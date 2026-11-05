@@ -1,0 +1,13 @@
+graph LR
+A[Red Local] --> B[Dokploy/Traefik]
+B --> C[Web Server]
+B --> D[Backend API]
+B --> E[Panel Admin]
+F[Servidor Linux] --> G[NTP]
+F --> H[NFS]
+F --> I[NIS]
+F --> J[CUPS]
+F --> K[Samba]
+H --> L[Clientes NFS]
+K --> M[Clientes Windows/Mac]
+I --> N[Autenticación]
