@@ -1,0 +1,2296 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+PS C:\WINDOWS\System32> multipass shell nutresa-server
+Welcome to Ubuntu 24.04.5 LTS (GNU/Linux 6.8.0-149-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Tue Nov 10 15:52:31 -05 2026
+
+  System load:  0.0               Processes:             106
+  Usage of /:   5.5% of 37.70GB   Users logged in:       0
+  Memory usage: 6%                IPv4 address for eth0: 172.31.38.240
+  Swap usage:   0%
+
+
+Expanded Security Maintenance for Applications is not enabled.
+
+0 updates can be applied immediately.
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: sudo pro status
+
+New release '26.04.1 LTS' available.
+Run 'do-release-upgrade' to upgrade to it.
+
+
+Last login: Tue Nov 10 15:34:14 2026 from 172.31.32.1
+ubuntu@nutresa-server:~$ ip -br addr
+lo               UNKNOWN        127.0.0.1/8 ::1/128
+eth0             UP             172.31.38.240/20 metric 100 fe80::5054:ff:fecc:8ccb/64
+eth1             UP             192.168.1.34/24 metric 200 fe80::5054:ff:fe1d:9907/64
+ubuntu@nutresa-server:~$ ip route
+default via 172.31.32.1 dev eth0 proto dhcp src 172.31.38.240 metric 100
+default via 192.168.1.1 dev eth1 proto dhcp src 192.168.1.34 metric 200
+172.31.32.0/20 dev eth0 proto kernel scope link src 172.31.38.240 metric 100
+172.31.32.1 dev eth0 proto dhcp scope link src 172.31.38.240 metric 100
+192.168.1.0/24 dev eth1 proto kernel scope link src 192.168.1.34 metric 200
+192.168.1.1 dev eth1 proto dhcp scope link src 192.168.1.34 metric 200
+200.21.200.10 via 192.168.1.1 dev eth1 proto dhcp src 192.168.1.34 metric 200
+200.21.200.80 via 192.168.1.1 dev eth1 proto dhcp src 192.168.1.34 metric 200
+ubuntu@nutresa-server:~$ timedatectl
+               Local time: Tue 2026-11-10 16:24:44 -05
+           Universal time: Tue 2026-11-10 21:24:44 UTC
+                 RTC time: Tue 2026-11-10 21:24:45
+                Time zone: America/Bogota (-05, -0500)
+System clock synchronized: yes
+              NTP service: active
+          RTC in local TZ: no
+ubuntu@nutresa-server:~$ sudo timedatectl set-ntp true
+ubuntu@nutresa-server:~$ date
+Tue Nov 10 16:26:49 -05 2026
+ubuntu@nutresa-server:~$ timedatectl status
+               Local time: Tue 2026-11-10 16:27:00 -05
+           Universal time: Tue 2026-11-10 21:27:00 UTC
+                 RTC time: Tue 2026-11-10 21:27:00
+                Time zone: America/Bogota (-05, -0500)
+System clock synchronized: yes
+              NTP service: active
+          RTC in local TZ: no
+ubuntu@nutresa-server:~$ ip link show eth1
+3: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP mode DEFAULT group default qlen 1000
+    link/ether 52:54:00:1d:99:07 brd ff:ff:ff:ff:ff:ff
+ubuntu@nutresa-server:~$ sudo apt update
+Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+3 packages can be upgraded. Run 'apt list --upgradable' to see them.
+ubuntu@nutresa-server:~$ sudo apt upgrade -y
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+The following upgrades have been deferred due to phasing:
+  distro-info python3-distro-info snapd
+0 upgraded, 0 newly installed, 0 to remove and 3 not upgraded.
+ubuntu@nutresa-server:~$ sudo apt install -y chrony nfs-kernel-server rpcbind nis samba cups
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following additional packages will be installed:
+  acl attr avahi-daemon colord colord-data cups-browsed cups-client cups-common cups-core-drivers cups-daemon cups-filters
+  cups-filters-core-drivers cups-ipp-utils cups-ppdc cups-server-common dconf-gsettings-backend dconf-service fonts-droid-fallback
+  fonts-noto-mono fonts-urw-base35 ghostscript glib-networking glib-networking-common glib-networking-services
+  gsettings-desktop-schemas ipp-usb keyutils libavahi-client3 libavahi-common-data libavahi-common3 libavahi-core7 libavahi-glib1
+  libboost-iostreams1.83.0 libboost-locale1.83.0 libboost-thread1.83.0 libcairo2 libcephfs2 libcolord2 libcolorhug2 libcups2t64
+  libcupsfilters2-common libcupsfilters2t64 libdaemon0 libdconf1 libexif12 libfontenc1 libgphoto2-6t64 libgphoto2-l10n
+  libgphoto2-port12t64 libgs-common libgs10 libgs10-common libgusb2 libice6 libidn12 libieee1284-3t64 libijs-0.35 libjbig2dec0
+  liblcms2-2 libldb2 liblouis-data liblouis20 liblouisutdml-bin liblouisutdml-data liblouisutdml9t64 libltdl7 libnfsidmap1 libnsl2
+  libnss-mdns libnss-nis libopenjp2-7 libpaper-utils libpaper1 libpixman-1-0 libpoppler-cpp0t64 libpoppler-glib8t64 libpoppler134
+  libppd2 libppd2-common libproxy1v5 libqpdf29t64 librados2 librdmacm1t64 libsane-common libsane1 libsm6 libsnapd-glib-2-1
+  libsnmp-base libsnmp40t64 libsoup-3.0-0 libsoup-3.0-common libtalloc2 libtdb1 libtevent0t64 liburing2 libwbclient0 libxcb-render0
+  libxcb-shm0 libxrender1 libxt6t64 make nfs-common nscd poppler-data poppler-utils python3-dnspython python3-gpg python3-ldb
+  python3-markdown python3-samba python3-talloc python3-tdb samba-ad-provision samba-common samba-common-bin samba-dsdb-modules
+  samba-libs samba-vfs-modules sane-airscan sane-utils session-migration ssl-cert tdb-tools tzdata-legacy update-inetd x11-common
+  xfonts-encodings xfonts-utils yp-tools ypbind-mt ypserv
+Suggested packages:
+  avahi-autoipd colord-sensor-argyll cups-bsd cups-pdf foomatic-db-compressed-ppds | foomatic-db smbclient antiword docx2txt
+  imagemagick lynx fonts-noto fonts-freefont-otf | fonts-freefont-ttf fonts-texgyre texlive-binaries gphoto2 liblcms2-utils ooo2dbk
+  rtf2xml avahi-autoipd | zeroconf hplip snmp-mibs-downloader make-doc watchdog fonts-japanese-mincho | fonts-ipafont-mincho
+  fonts-japanese-gothic | fonts-ipafont-gothic fonts-arphic-ukai fonts-arphic-uming fonts-nanum python3-trio python3-aioquic
+  python3-h2 python3-httpx python3-httpcore python-markdown-doc bind9 bind9utils ctdb ldb-tools winbind heimdal-clients unpaper
+  krb5-kdc
+Recommended packages:
+  printer-driver-braille
+The following packages will be REMOVED:
+  systemd-timesyncd
+The following NEW packages will be installed:
+  acl attr avahi-daemon chrony colord colord-data cups cups-browsed cups-client cups-common cups-core-drivers cups-daemon
+  cups-filters cups-filters-core-drivers cups-ipp-utils cups-ppdc cups-server-common dconf-gsettings-backend dconf-service
+  fonts-droid-fallback fonts-noto-mono fonts-urw-base35 ghostscript glib-networking glib-networking-common glib-networking-services
+  gsettings-desktop-schemas ipp-usb keyutils libavahi-client3 libavahi-common-data libavahi-common3 libavahi-core7 libavahi-glib1
+  libboost-iostreams1.83.0 libboost-locale1.83.0 libboost-thread1.83.0 libcairo2 libcephfs2 libcolord2 libcolorhug2 libcups2t64
+  libcupsfilters2-common libcupsfilters2t64 libdaemon0 libdconf1 libexif12 libfontenc1 libgphoto2-6t64 libgphoto2-l10n
+  libgphoto2-port12t64 libgs-common libgs10 libgs10-common libgusb2 libice6 libidn12 libieee1284-3t64 libijs-0.35 libjbig2dec0
+  liblcms2-2 libldb2 liblouis-data liblouis20 liblouisutdml-bin liblouisutdml-data liblouisutdml9t64 libltdl7 libnfsidmap1 libnsl2
+  libnss-mdns libnss-nis libopenjp2-7 libpaper-utils libpaper1 libpixman-1-0 libpoppler-cpp0t64 libpoppler-glib8t64 libpoppler134
+  libppd2 libppd2-common libproxy1v5 libqpdf29t64 librados2 librdmacm1t64 libsane-common libsane1 libsm6 libsnapd-glib-2-1
+  libsnmp-base libsnmp40t64 libsoup-3.0-0 libsoup-3.0-common libtalloc2 libtdb1 libtevent0t64 liburing2 libwbclient0 libxcb-render0
+  libxcb-shm0 libxrender1 libxt6t64 make nfs-common nfs-kernel-server nis nscd poppler-data poppler-utils python3-dnspython
+  python3-gpg python3-ldb python3-markdown python3-samba python3-talloc python3-tdb rpcbind samba samba-ad-provision samba-common
+  samba-common-bin samba-dsdb-modules samba-libs samba-vfs-modules sane-airscan sane-utils session-migration ssl-cert tdb-tools
+  tzdata-legacy update-inetd x11-common xfonts-encodings xfonts-utils yp-tools ypbind-mt ypserv
+0 upgraded, 137 newly installed, 1 to remove and 3 not upgraded.
+Need to get 62.3 MB of archives.
+After this operation, 259 MB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libavahi-common-data amd64 0.8-13ubuntu6.2 [30.1 kB]
+Get:2 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libavahi-common3 amd64 0.8-13ubuntu6.2 [23.4 kB]
+Get:3 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libavahi-client3 amd64 0.8-13ubuntu6.2 [26.8 kB]
+Get:4 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libcups2t64 amd64 2.4.7-1.2ubuntu7.14 [274 kB]
+Get:5 http://archive.ubuntu.com/ubuntu noble/main amd64 ssl-cert all 1.1.2ubuntu1 [17.8 kB]
+Get:6 http://archive.ubuntu.com/ubuntu noble/main amd64 libpaper1 amd64 1.1.29build1 [13.4 kB]
+Get:7 http://archive.ubuntu.com/ubuntu noble/main amd64 libproxy1v5 amd64 0.5.4-4build1 [26.5 kB]
+Get:8 http://archive.ubuntu.com/ubuntu noble/main amd64 glib-networking-common all 2.80.0-1build1 [6702 B]
+Get:9 http://archive.ubuntu.com/ubuntu noble/main amd64 glib-networking-services amd64 2.80.0-1build1 [12.8 kB]
+Get:10 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libdconf1 amd64 0.40.0-4ubuntu0.1 [39.6 kB]
+Get:11 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 dconf-service amd64 0.40.0-4ubuntu0.1 [27.6 kB]
+Get:12 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 dconf-gsettings-backend amd64 0.40.0-4ubuntu0.1 [22.1 kB]
+Get:13 http://archive.ubuntu.com/ubuntu noble/main amd64 session-migration amd64 0.3.9build1 [9034 B]
+Get:14 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 gsettings-desktop-schemas all 46.1-0ubuntu1 [35.6 kB]
+Get:15 http://archive.ubuntu.com/ubuntu noble/main amd64 glib-networking amd64 2.80.0-1build1 [64.1 kB]
+Get:16 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libsoup-3.0-common all 3.4.4-5ubuntu0.11 [13.0 kB]
+Get:17 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libsoup-3.0-0 amd64 3.4.4-5ubuntu0.11 [292 kB]
+Get:18 http://archive.ubuntu.com/ubuntu noble/main amd64 libsnapd-glib-2-1 amd64 1.64-0ubuntu5 [107 kB]
+Get:19 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 cups-daemon amd64 2.4.7-1.2ubuntu7.14 [364 kB]
+Get:20 http://archive.ubuntu.com/ubuntu noble/main amd64 fonts-droid-fallback all 1:6.0.1r16-1.1build1 [1805 kB]
+Get:21 http://archive.ubuntu.com/ubuntu noble/main amd64 libsane-common all 1.2.1-7build4 [906 kB]
+Get:22 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libnfsidmap1 amd64 1:2.6.4-3ubuntu5.1 [48.3 kB]
+Get:23 http://archive.ubuntu.com/ubuntu noble/main amd64 rpcbind amd64 1.2.6-7ubuntu2 [46.5 kB]
+Get:24 http://archive.ubuntu.com/ubuntu noble/main amd64 keyutils amd64 1.6.3-3build1 [56.8 kB]
+Get:25 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 nfs-common amd64 1:2.6.4-3ubuntu5.1 [248 kB]
+Get:26 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 nscd amd64 2.39-0ubuntu8.9 [70.5 kB]
+Get:27 http://archive.ubuntu.com/ubuntu noble/main amd64 poppler-data all 0.4.12-1 [2060 kB]
+Get:28 http://archive.ubuntu.com/ubuntu noble/main amd64 python3-dnspython all 2.6.1-1ubuntu1 [163 kB]
+Get:29 http://archive.ubuntu.com/ubuntu noble/main amd64 libtalloc2 amd64 2.4.2-1build2 [27.3 kB]
+Get:30 http://archive.ubuntu.com/ubuntu noble/main amd64 libtdb1 amd64 1.4.10-1build1 [46.8 kB]
+Get:31 http://archive.ubuntu.com/ubuntu noble/main amd64 libtevent0t64 amd64 0.16.1-2build1 [42.6 kB]
+Get:32 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libldb2 amd64 2:2.8.0+samba4.19.5+dfsg-4ubuntu9.8 [188 kB]
+Get:33 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 python3-ldb amd64 2:2.8.0+samba4.19.5+dfsg-4ubuntu9.8 [41.8 kB]
+Get:34 http://archive.ubuntu.com/ubuntu noble/main amd64 python3-tdb amd64 1.4.10-1build1 [15.3 kB]
+Get:35 http://archive.ubuntu.com/ubuntu noble/main amd64 python3-markdown all 3.5.2-1 [72.0 kB]
+Get:36 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libwbclient0 amd64 2:4.19.5+dfsg-4ubuntu9.8 [72.3 kB]
+Get:37 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 samba-libs amd64 2:4.19.5+dfsg-4ubuntu9.8 [6019 kB]
+Get:38 http://archive.ubuntu.com/ubuntu noble/main amd64 python3-talloc amd64 2.4.2-1build2 [12.9 kB]
+Get:39 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 python3-samba amd64 2:4.19.5+dfsg-4ubuntu9.8 [2894 kB]
+Get:40 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 samba-common all 2:4.19.5+dfsg-4ubuntu9.8 [65.7 kB]
+Get:41 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 samba-common-bin amd64 2:4.19.5+dfsg-4ubuntu9.8 [1280 kB]
+Get:42 http://archive.ubuntu.com/ubuntu noble/main amd64 tdb-tools amd64 1.4.10-1build1 [25.8 kB]
+Get:43 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 samba amd64 2:4.19.5+dfsg-4ubuntu9.8 [1004 kB]
+Get:44 http://archive.ubuntu.com/ubuntu noble/main amd64 update-inetd all 4.53 [24.0 kB]
+Get:45 http://archive.ubuntu.com/ubuntu noble/main amd64 libieee1284-3t64 amd64 0.2.11-14.1build1 [22.0 kB]
+Get:46 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 acl amd64 2.3.2-1build1.1 [39.4 kB]
+Get:47 http://archive.ubuntu.com/ubuntu noble/main amd64 libpixman-1-0 amd64 0.42.2-1build1 [279 kB]
+Get:48 http://archive.ubuntu.com/ubuntu noble/main amd64 libxcb-render0 amd64 1.15-1ubuntu2 [16.2 kB]
+Get:49 http://archive.ubuntu.com/ubuntu noble/main amd64 libxcb-shm0 amd64 1.15-1ubuntu2 [5756 B]
+Get:50 http://archive.ubuntu.com/ubuntu noble/main amd64 libxrender1 amd64 1:0.9.10-1.1build1 [19.0 kB]
+Get:51 http://archive.ubuntu.com/ubuntu noble/main amd64 libcairo2 amd64 1.18.0-3build1 [566 kB]
+Get:52 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libexif12 amd64 0.6.24-1ubuntu0.24.04.1 [88.3 kB]
+Get:53 http://archive.ubuntu.com/ubuntu noble/main amd64 libltdl7 amd64 2.4.7-7build1 [40.3 kB]
+Get:54 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libgphoto2-port12t64 amd64 2.5.31-2.1ubuntu1.2 [59.3 kB]
+Get:55 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libgphoto2-6t64 amd64 2.5.31-2.1ubuntu1.2 [735 kB]
+Get:56 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 liblcms2-2 amd64 2.14-2ubuntu0.1 [161 kB]
+Get:57 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libopenjp2-7 amd64 2.5.0-2ubuntu0.5 [174 kB]
+Get:58 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libpoppler134 amd64 24.02.0-1ubuntu9.11 [1118 kB]
+Get:59 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libpoppler-glib8t64 amd64 24.02.0-1ubuntu9.11 [156 kB]
+Get:60 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libsnmp-base all 5.9.4+dfsg-1.1ubuntu3.3 [206 kB]
+Get:61 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libsnmp40t64 amd64 5.9.4+dfsg-1.1ubuntu3.3 [1067 kB]
+Get:62 http://archive.ubuntu.com/ubuntu noble/main amd64 libsane1 amd64 1.2.1-7build4 [2807 kB]
+Get:63 http://archive.ubuntu.com/ubuntu noble/main amd64 sane-utils amd64 1.2.1-7build4 [191 kB]
+Get:64 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 tzdata-legacy all 2026e-0ubuntu0.24.04.1 [95.4 kB]
+Get:65 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 chrony amd64 4.5-1ubuntu4.2 [316 kB]
+Get:66 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 attr amd64 1:2.5.2-1ubuntu0.1 [25.3 kB]
+Get:67 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libavahi-core7 amd64 0.8-13ubuntu6.2 [88.4 kB]
+Get:68 http://archive.ubuntu.com/ubuntu noble/main amd64 libdaemon0 amd64 0.14-7.1ubuntu4 [13.0 kB]
+Get:69 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 avahi-daemon amd64 0.8-13ubuntu6.2 [66.1 kB]
+Get:70 http://archive.ubuntu.com/ubuntu noble/main amd64 colord-data all 1.4.7-1build2 [1212 kB]
+Get:71 http://archive.ubuntu.com/ubuntu noble/main amd64 libcolord2 amd64 1.4.7-1build2 [149 kB]
+Get:72 http://archive.ubuntu.com/ubuntu noble/main amd64 libgusb2 amd64 0.4.8-1build2 [38.5 kB]
+Get:73 http://archive.ubuntu.com/ubuntu noble/main amd64 libcolorhug2 amd64 1.4.7-1build2 [37.9 kB]
+Get:74 http://archive.ubuntu.com/ubuntu noble/main amd64 colord amd64 1.4.7-1build2 [190 kB]
+Get:75 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 cups-common all 2.4.7-1.2ubuntu7.14 [264 kB]
+Get:76 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 cups-client amd64 2.4.7-1.2ubuntu7.14 [154 kB]
+Get:77 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 cups-ipp-utils amd64 2.4.7-1.2ubuntu7.14 [233 kB]
+Get:78 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 poppler-utils amd64 24.02.0-1ubuntu9.11 [212 kB]
+Get:79 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libpoppler-cpp0t64 amd64 24.02.0-1ubuntu9.11 [41.3 kB]
+Get:80 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libqpdf29t64 amd64 11.9.0-1.1ubuntu0.1 [798 kB]
+Get:81 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libcupsfilters2-common all 2.0.0-0ubuntu7.2 [244 kB]
+Get:82 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libcupsfilters2t64 amd64 2.0.0-0ubuntu7.2 [310 kB]
+Get:83 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libppd2-common all 2:2.0.0-0ubuntu4.1 [9868 B]
+Get:84 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libppd2 amd64 2:2.0.0-0ubuntu4.1 [256 kB]
+Get:85 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 cups-filters-core-drivers amd64 2.0.0-0ubuntu4.1 [52.7 kB]
+Get:86 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 cups-core-drivers amd64 2.4.7-1.2ubuntu7.14 [29.5 kB]
+Get:87 http://archive.ubuntu.com/ubuntu noble/main amd64 libfontenc1 amd64 1:1.1.8-1build1 [14.0 kB]
+Get:88 http://archive.ubuntu.com/ubuntu noble/main amd64 x11-common all 1:7.7+23ubuntu3 [21.7 kB]
+Get:89 http://archive.ubuntu.com/ubuntu noble/main amd64 xfonts-encodings all 1:1.0.5-0ubuntu2 [578 kB]
+Get:90 http://archive.ubuntu.com/ubuntu noble/main amd64 xfonts-utils amd64 1:7.7+6build3 [94.4 kB]
+Get:91 http://archive.ubuntu.com/ubuntu noble/main amd64 fonts-urw-base35 all 20200910-8 [11.0 MB]
+Get:92 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libgs-common all 10.02.1~dfsg1-0ubuntu7.10 [176 kB]
+Get:93 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libgs10-common all 10.02.1~dfsg1-0ubuntu7.10 [488 kB]
+Get:94 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libidn12 amd64 1.42-1ubuntu0.1 [56.1 kB]
+Get:95 http://archive.ubuntu.com/ubuntu noble/main amd64 libijs-0.35 amd64 0.35-15.1build1 [15.3 kB]
+Get:96 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libjbig2dec0 amd64 0.20-1ubuntu0.24.04.1 [65.2 kB]
+Get:97 http://archive.ubuntu.com/ubuntu noble/main amd64 libice6 amd64 2:1.0.10-1build3 [41.4 kB]
+Get:98 http://archive.ubuntu.com/ubuntu noble/main amd64 libsm6 amd64 2:1.2.3-1build3 [15.7 kB]
+Get:99 http://archive.ubuntu.com/ubuntu noble/main amd64 libxt6t64 amd64 1:1.2.1-1.2build1 [171 kB]
+Get:100 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libgs10 amd64 10.02.1~dfsg1-0ubuntu7.10 [3900 kB]
+Get:101 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 ghostscript amd64 10.02.1~dfsg1-0ubuntu7.10 [43.4 kB]
+Get:102 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 cups-filters amd64 2.0.0-0ubuntu4.1 [127 kB]
+Get:103 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 cups-ppdc amd64 2.4.7-1.2ubuntu7.14 [119 kB]
+Get:104 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 cups-server-common all 2.4.7-1.2ubuntu7.14 [421 kB]
+Get:105 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 cups amd64 2.4.7-1.2ubuntu7.14 [292 kB]
+Get:106 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libavahi-glib1 amd64 0.8-13ubuntu6.2 [8186 B]
+Get:107 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 cups-browsed amd64 2.0.0-0ubuntu10.3 [118 kB]
+Get:108 http://archive.ubuntu.com/ubuntu noble/main amd64 fonts-noto-mono all 20201225-2 [435 kB]
+Get:109 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 ipp-usb amd64 0.9.24-0ubuntu3.3 [2180 kB]
+Get:110 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libboost-iostreams1.83.0 amd64 1.83.0-2.1ubuntu3.2 [260 kB]
+Get:111 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libboost-thread1.83.0 amd64 1.83.0-2.1ubuntu3.2 [276 kB]
+Get:112 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libboost-locale1.83.0 amd64 1.83.0-2.1ubuntu3.2 [413 kB]
+Get:113 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 librdmacm1t64 amd64 50.0-2ubuntu0.2 [70.7 kB]
+Get:114 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 librados2 amd64 19.2.3-0ubuntu0.24.04.3 [4041 kB]
+Get:115 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libcephfs2 amd64 19.2.3-0ubuntu0.24.04.3 [839 kB]
+Get:116 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libgphoto2-l10n all 2.5.31-2.1ubuntu1.2 [15.8 kB]
+Get:117 http://archive.ubuntu.com/ubuntu noble/main amd64 liblouis-data all 3.29.0-1build1 [2258 kB]
+Get:118 http://archive.ubuntu.com/ubuntu noble/main amd64 liblouis20 amd64 3.29.0-1build1 [90.6 kB]
+Get:119 http://archive.ubuntu.com/ubuntu noble/main amd64 liblouisutdml-data all 2.12.0-3.1build1 [49.8 kB]
+Get:120 http://archive.ubuntu.com/ubuntu noble/main amd64 liblouisutdml9t64 amd64 2.12.0-3.1build1 [89.7 kB]
+Get:121 http://archive.ubuntu.com/ubuntu noble/main amd64 libnsl2 amd64 1.3.0-3build3 [41.4 kB]
+Get:122 http://archive.ubuntu.com/ubuntu noble/main amd64 libnss-mdns amd64 0.15.1-4build1 [23.1 kB]
+Get:123 http://archive.ubuntu.com/ubuntu noble/universe amd64 libnss-nis amd64 3.1-0ubuntu7 [26.5 kB]
+Get:124 http://archive.ubuntu.com/ubuntu noble/main amd64 libpaper-utils amd64 1.1.29build1 [8650 B]
+Get:125 http://archive.ubuntu.com/ubuntu noble/main amd64 liburing2 amd64 2.5-1build1 [21.1 kB]
+Get:126 http://archive.ubuntu.com/ubuntu noble/main amd64 make amd64 4.3-4.1build2 [180 kB]
+Get:127 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 nfs-kernel-server amd64 1:2.6.4-3ubuntu5.1 [169 kB]
+Get:128 http://archive.ubuntu.com/ubuntu noble/main amd64 python3-gpg amd64 1.18.0-4.1ubuntu4 [209 kB]
+Get:129 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 samba-ad-provision all 2:4.19.5+dfsg-4ubuntu9.8 [488 kB]
+Get:130 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 samba-dsdb-modules amd64 2:4.19.5+dfsg-4ubuntu9.8 [319 kB]
+Get:131 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 samba-vfs-modules amd64 2:4.19.5+dfsg-4ubuntu9.8 [416 kB]
+Get:132 http://archive.ubuntu.com/ubuntu noble/main amd64 sane-airscan amd64 0.99.29-0ubuntu4 [146 kB]
+Get:133 http://archive.ubuntu.com/ubuntu noble/universe amd64 ypbind-mt amd64 2.7.2-3build1 [36.0 kB]
+Get:134 http://archive.ubuntu.com/ubuntu noble/universe amd64 yp-tools amd64 4.2.3-4build1 [52.4 kB]
+Get:135 http://archive.ubuntu.com/ubuntu noble/universe amd64 ypserv amd64 4.2-2build2 [110 kB]
+Get:136 http://archive.ubuntu.com/ubuntu noble/main amd64 liblouisutdml-bin amd64 2.12.0-3.1build1 [9584 B]
+Get:137 http://archive.ubuntu.com/ubuntu noble/universe amd64 nis all 4.5 [13.1 kB]
+Fetched 62.3 MB in 12s (5046 kB/s)
+Extracting templates from packages: 100%
+Preconfiguring packages ...
+(Reading database ... 106791 files and directories currently installed.)
+Removing systemd-timesyncd (255.4-1ubuntu8.18) ...
+Selecting previously unselected package libavahi-common-data:amd64.
+(Reading database ... 106775 files and directories currently installed.)
+Preparing to unpack .../000-libavahi-common-data_0.8-13ubuntu6.2_amd64.deb ...
+Unpacking libavahi-common-data:amd64 (0.8-13ubuntu6.2) ...
+Selecting previously unselected package libavahi-common3:amd64.
+Preparing to unpack .../001-libavahi-common3_0.8-13ubuntu6.2_amd64.deb ...
+Unpacking libavahi-common3:amd64 (0.8-13ubuntu6.2) ...
+Selecting previously unselected package libavahi-client3:amd64.
+Preparing to unpack .../002-libavahi-client3_0.8-13ubuntu6.2_amd64.deb ...
+Unpacking libavahi-client3:amd64 (0.8-13ubuntu6.2) ...
+Selecting previously unselected package libcups2t64:amd64.
+Preparing to unpack .../003-libcups2t64_2.4.7-1.2ubuntu7.14_amd64.deb ...
+Unpacking libcups2t64:amd64 (2.4.7-1.2ubuntu7.14) ...
+Selecting previously unselected package ssl-cert.
+Preparing to unpack .../004-ssl-cert_1.1.2ubuntu1_all.deb ...
+Unpacking ssl-cert (1.1.2ubuntu1) ...
+Selecting previously unselected package libpaper1:amd64.
+Preparing to unpack .../005-libpaper1_1.1.29build1_amd64.deb ...
+Unpacking libpaper1:amd64 (1.1.29build1) ...
+Selecting previously unselected package libproxy1v5:amd64.
+Preparing to unpack .../006-libproxy1v5_0.5.4-4build1_amd64.deb ...
+Unpacking libproxy1v5:amd64 (0.5.4-4build1) ...
+Selecting previously unselected package glib-networking-common.
+Preparing to unpack .../007-glib-networking-common_2.80.0-1build1_all.deb ...
+Unpacking glib-networking-common (2.80.0-1build1) ...
+Selecting previously unselected package glib-networking-services.
+Preparing to unpack .../008-glib-networking-services_2.80.0-1build1_amd64.deb ...
+Unpacking glib-networking-services (2.80.0-1build1) ...
+Selecting previously unselected package libdconf1:amd64.
+Preparing to unpack .../009-libdconf1_0.40.0-4ubuntu0.1_amd64.deb ...
+Unpacking libdconf1:amd64 (0.40.0-4ubuntu0.1) ...
+Selecting previously unselected package dconf-service.
+Preparing to unpack .../010-dconf-service_0.40.0-4ubuntu0.1_amd64.deb ...
+Unpacking dconf-service (0.40.0-4ubuntu0.1) ...
+Selecting previously unselected package dconf-gsettings-backend:amd64.
+Preparing to unpack .../011-dconf-gsettings-backend_0.40.0-4ubuntu0.1_amd64.deb ...
+Unpacking dconf-gsettings-backend:amd64 (0.40.0-4ubuntu0.1) ...
+Selecting previously unselected package session-migration.
+Preparing to unpack .../012-session-migration_0.3.9build1_amd64.deb ...
+Unpacking session-migration (0.3.9build1) ...
+Selecting previously unselected package gsettings-desktop-schemas.
+Preparing to unpack .../013-gsettings-desktop-schemas_46.1-0ubuntu1_all.deb ...
+Unpacking gsettings-desktop-schemas (46.1-0ubuntu1) ...
+Selecting previously unselected package glib-networking:amd64.
+Preparing to unpack .../014-glib-networking_2.80.0-1build1_amd64.deb ...
+Unpacking glib-networking:amd64 (2.80.0-1build1) ...
+Selecting previously unselected package libsoup-3.0-common.
+Preparing to unpack .../015-libsoup-3.0-common_3.4.4-5ubuntu0.11_all.deb ...
+Unpacking libsoup-3.0-common (3.4.4-5ubuntu0.11) ...
+Selecting previously unselected package libsoup-3.0-0:amd64.
+Preparing to unpack .../016-libsoup-3.0-0_3.4.4-5ubuntu0.11_amd64.deb ...
+Unpacking libsoup-3.0-0:amd64 (3.4.4-5ubuntu0.11) ...
+Selecting previously unselected package libsnapd-glib-2-1:amd64.
+Preparing to unpack .../017-libsnapd-glib-2-1_1.64-0ubuntu5_amd64.deb ...
+Unpacking libsnapd-glib-2-1:amd64 (1.64-0ubuntu5) ...
+Selecting previously unselected package cups-daemon.
+Preparing to unpack .../018-cups-daemon_2.4.7-1.2ubuntu7.14_amd64.deb ...
+Unpacking cups-daemon (2.4.7-1.2ubuntu7.14) ...
+Selecting previously unselected package fonts-droid-fallback.
+Preparing to unpack .../019-fonts-droid-fallback_1%3a6.0.1r16-1.1build1_all.deb ...
+Unpacking fonts-droid-fallback (1:6.0.1r16-1.1build1) ...
+Selecting previously unselected package libsane-common.
+Preparing to unpack .../020-libsane-common_1.2.1-7build4_all.deb ...
+Unpacking libsane-common (1.2.1-7build4) ...
+Selecting previously unselected package libnfsidmap1:amd64.
+Preparing to unpack .../021-libnfsidmap1_1%3a2.6.4-3ubuntu5.1_amd64.deb ...
+Unpacking libnfsidmap1:amd64 (1:2.6.4-3ubuntu5.1) ...
+Selecting previously unselected package rpcbind.
+Preparing to unpack .../022-rpcbind_1.2.6-7ubuntu2_amd64.deb ...
+Unpacking rpcbind (1.2.6-7ubuntu2) ...
+Selecting previously unselected package keyutils.
+Preparing to unpack .../023-keyutils_1.6.3-3build1_amd64.deb ...
+Unpacking keyutils (1.6.3-3build1) ...
+Selecting previously unselected package nfs-common.
+Preparing to unpack .../024-nfs-common_1%3a2.6.4-3ubuntu5.1_amd64.deb ...
+Unpacking nfs-common (1:2.6.4-3ubuntu5.1) ...
+Selecting previously unselected package nscd.
+Preparing to unpack .../025-nscd_2.39-0ubuntu8.9_amd64.deb ...
+Unpacking nscd (2.39-0ubuntu8.9) ...
+Selecting previously unselected package poppler-data.
+Preparing to unpack .../026-poppler-data_0.4.12-1_all.deb ...
+Unpacking poppler-data (0.4.12-1) ...
+Selecting previously unselected package python3-dnspython.
+Preparing to unpack .../027-python3-dnspython_2.6.1-1ubuntu1_all.deb ...
+Unpacking python3-dnspython (2.6.1-1ubuntu1) ...
+Selecting previously unselected package libtalloc2:amd64.
+Preparing to unpack .../028-libtalloc2_2.4.2-1build2_amd64.deb ...
+Unpacking libtalloc2:amd64 (2.4.2-1build2) ...
+Selecting previously unselected package libtdb1:amd64.
+Preparing to unpack .../029-libtdb1_1.4.10-1build1_amd64.deb ...
+Unpacking libtdb1:amd64 (1.4.10-1build1) ...
+Selecting previously unselected package libtevent0t64:amd64.
+Preparing to unpack .../030-libtevent0t64_0.16.1-2build1_amd64.deb ...
+Unpacking libtevent0t64:amd64 (0.16.1-2build1) ...
+Selecting previously unselected package libldb2:amd64.
+Preparing to unpack .../031-libldb2_2%3a2.8.0+samba4.19.5+dfsg-4ubuntu9.8_amd64.deb ...
+Unpacking libldb2:amd64 (2:2.8.0+samba4.19.5+dfsg-4ubuntu9.8) ...
+Selecting previously unselected package python3-ldb.
+Preparing to unpack .../032-python3-ldb_2%3a2.8.0+samba4.19.5+dfsg-4ubuntu9.8_amd64.deb ...
+Unpacking python3-ldb (2:2.8.0+samba4.19.5+dfsg-4ubuntu9.8) ...
+Selecting previously unselected package python3-tdb.
+Preparing to unpack .../033-python3-tdb_1.4.10-1build1_amd64.deb ...
+Unpacking python3-tdb (1.4.10-1build1) ...
+Selecting previously unselected package python3-markdown.
+Preparing to unpack .../034-python3-markdown_3.5.2-1_all.deb ...
+Unpacking python3-markdown (3.5.2-1) ...
+Selecting previously unselected package libwbclient0:amd64.
+Preparing to unpack .../035-libwbclient0_2%3a4.19.5+dfsg-4ubuntu9.8_amd64.deb ...
+Unpacking libwbclient0:amd64 (2:4.19.5+dfsg-4ubuntu9.8) ...
+Selecting previously unselected package samba-libs:amd64.
+Preparing to unpack .../036-samba-libs_2%3a4.19.5+dfsg-4ubuntu9.8_amd64.deb ...
+Unpacking samba-libs:amd64 (2:4.19.5+dfsg-4ubuntu9.8) ...
+Selecting previously unselected package python3-talloc:amd64.
+Preparing to unpack .../037-python3-talloc_2.4.2-1build2_amd64.deb ...
+Unpacking python3-talloc:amd64 (2.4.2-1build2) ...
+Selecting previously unselected package python3-samba.
+Preparing to unpack .../038-python3-samba_2%3a4.19.5+dfsg-4ubuntu9.8_amd64.deb ...
+Unpacking python3-samba (2:4.19.5+dfsg-4ubuntu9.8) ...
+Selecting previously unselected package samba-common.
+Preparing to unpack .../039-samba-common_2%3a4.19.5+dfsg-4ubuntu9.8_all.deb ...
+Unpacking samba-common (2:4.19.5+dfsg-4ubuntu9.8) ...
+Selecting previously unselected package samba-common-bin.
+Preparing to unpack .../040-samba-common-bin_2%3a4.19.5+dfsg-4ubuntu9.8_amd64.deb ...
+Unpacking samba-common-bin (2:4.19.5+dfsg-4ubuntu9.8) ...
+Selecting previously unselected package tdb-tools.
+Preparing to unpack .../041-tdb-tools_1.4.10-1build1_amd64.deb ...
+Unpacking tdb-tools (1.4.10-1build1) ...
+Selecting previously unselected package samba.
+Preparing to unpack .../042-samba_2%3a4.19.5+dfsg-4ubuntu9.8_amd64.deb ...
+Unpacking samba (2:4.19.5+dfsg-4ubuntu9.8) ...
+Selecting previously unselected package update-inetd.
+Preparing to unpack .../043-update-inetd_4.53_all.deb ...
+Unpacking update-inetd (4.53) ...
+Selecting previously unselected package libieee1284-3t64:amd64.
+Preparing to unpack .../044-libieee1284-3t64_0.2.11-14.1build1_amd64.deb ...
+Unpacking libieee1284-3t64:amd64 (0.2.11-14.1build1) ...
+Selecting previously unselected package acl.
+Preparing to unpack .../045-acl_2.3.2-1build1.1_amd64.deb ...
+Unpacking acl (2.3.2-1build1.1) ...
+Selecting previously unselected package libpixman-1-0:amd64.
+Preparing to unpack .../046-libpixman-1-0_0.42.2-1build1_amd64.deb ...
+Unpacking libpixman-1-0:amd64 (0.42.2-1build1) ...
+Selecting previously unselected package libxcb-render0:amd64.
+Preparing to unpack .../047-libxcb-render0_1.15-1ubuntu2_amd64.deb ...
+Unpacking libxcb-render0:amd64 (1.15-1ubuntu2) ...
+Selecting previously unselected package libxcb-shm0:amd64.
+Preparing to unpack .../048-libxcb-shm0_1.15-1ubuntu2_amd64.deb ...
+Unpacking libxcb-shm0:amd64 (1.15-1ubuntu2) ...
+Selecting previously unselected package libxrender1:amd64.
+Preparing to unpack .../049-libxrender1_1%3a0.9.10-1.1build1_amd64.deb ...
+Unpacking libxrender1:amd64 (1:0.9.10-1.1build1) ...
+Selecting previously unselected package libcairo2:amd64.
+Preparing to unpack .../050-libcairo2_1.18.0-3build1_amd64.deb ...
+Unpacking libcairo2:amd64 (1.18.0-3build1) ...
+Selecting previously unselected package libexif12:amd64.
+Preparing to unpack .../051-libexif12_0.6.24-1ubuntu0.24.04.1_amd64.deb ...
+Unpacking libexif12:amd64 (0.6.24-1ubuntu0.24.04.1) ...
+Selecting previously unselected package libltdl7:amd64.
+Preparing to unpack .../052-libltdl7_2.4.7-7build1_amd64.deb ...
+Unpacking libltdl7:amd64 (2.4.7-7build1) ...
+Selecting previously unselected package libgphoto2-port12t64:amd64.
+Preparing to unpack .../053-libgphoto2-port12t64_2.5.31-2.1ubuntu1.2_amd64.deb ...
+Unpacking libgphoto2-port12t64:amd64 (2.5.31-2.1ubuntu1.2) ...
+Selecting previously unselected package libgphoto2-6t64:amd64.
+Preparing to unpack .../054-libgphoto2-6t64_2.5.31-2.1ubuntu1.2_amd64.deb ...
+Unpacking libgphoto2-6t64:amd64 (2.5.31-2.1ubuntu1.2) ...
+Selecting previously unselected package liblcms2-2:amd64.
+Preparing to unpack .../055-liblcms2-2_2.14-2ubuntu0.1_amd64.deb ...
+Unpacking liblcms2-2:amd64 (2.14-2ubuntu0.1) ...
+Selecting previously unselected package libopenjp2-7:amd64.
+Preparing to unpack .../056-libopenjp2-7_2.5.0-2ubuntu0.5_amd64.deb ...
+Unpacking libopenjp2-7:amd64 (2.5.0-2ubuntu0.5) ...
+Selecting previously unselected package libpoppler134:amd64.
+Preparing to unpack .../057-libpoppler134_24.02.0-1ubuntu9.11_amd64.deb ...
+Unpacking libpoppler134:amd64 (24.02.0-1ubuntu9.11) ...
+Selecting previously unselected package libpoppler-glib8t64:amd64.
+Preparing to unpack .../058-libpoppler-glib8t64_24.02.0-1ubuntu9.11_amd64.deb ...
+Unpacking libpoppler-glib8t64:amd64 (24.02.0-1ubuntu9.11) ...
+Selecting previously unselected package libsnmp-base.
+Preparing to unpack .../059-libsnmp-base_5.9.4+dfsg-1.1ubuntu3.3_all.deb ...
+Unpacking libsnmp-base (5.9.4+dfsg-1.1ubuntu3.3) ...
+Selecting previously unselected package libsnmp40t64:amd64.
+Preparing to unpack .../060-libsnmp40t64_5.9.4+dfsg-1.1ubuntu3.3_amd64.deb ...
+Unpacking libsnmp40t64:amd64 (5.9.4+dfsg-1.1ubuntu3.3) ...
+Selecting previously unselected package libsane1:amd64.
+Preparing to unpack .../061-libsane1_1.2.1-7build4_amd64.deb ...
+Unpacking libsane1:amd64 (1.2.1-7build4) ...
+Selecting previously unselected package sane-utils.
+Preparing to unpack .../062-sane-utils_1.2.1-7build4_amd64.deb ...
+Unpacking sane-utils (1.2.1-7build4) ...
+Selecting previously unselected package tzdata-legacy.
+Preparing to unpack .../063-tzdata-legacy_2026e-0ubuntu0.24.04.1_all.deb ...
+Unpacking tzdata-legacy (2026e-0ubuntu0.24.04.1) ...
+Selecting previously unselected package chrony.
+Preparing to unpack .../064-chrony_4.5-1ubuntu4.2_amd64.deb ...
+Unpacking chrony (4.5-1ubuntu4.2) ...
+Selecting previously unselected package attr.
+Preparing to unpack .../065-attr_1%3a2.5.2-1ubuntu0.1_amd64.deb ...
+Unpacking attr (1:2.5.2-1ubuntu0.1) ...
+Selecting previously unselected package libavahi-core7:amd64.
+Preparing to unpack .../066-libavahi-core7_0.8-13ubuntu6.2_amd64.deb ...
+Unpacking libavahi-core7:amd64 (0.8-13ubuntu6.2) ...
+Selecting previously unselected package libdaemon0:amd64.
+Preparing to unpack .../067-libdaemon0_0.14-7.1ubuntu4_amd64.deb ...
+Unpacking libdaemon0:amd64 (0.14-7.1ubuntu4) ...
+Selecting previously unselected package avahi-daemon.
+Preparing to unpack .../068-avahi-daemon_0.8-13ubuntu6.2_amd64.deb ...
+Unpacking avahi-daemon (0.8-13ubuntu6.2) ...
+Selecting previously unselected package colord-data.
+Preparing to unpack .../069-colord-data_1.4.7-1build2_all.deb ...
+Unpacking colord-data (1.4.7-1build2) ...
+Selecting previously unselected package libcolord2:amd64.
+Preparing to unpack .../070-libcolord2_1.4.7-1build2_amd64.deb ...
+Unpacking libcolord2:amd64 (1.4.7-1build2) ...
+Selecting previously unselected package libgusb2:amd64.
+Preparing to unpack .../071-libgusb2_0.4.8-1build2_amd64.deb ...
+Unpacking libgusb2:amd64 (0.4.8-1build2) ...
+Selecting previously unselected package libcolorhug2:amd64.
+Preparing to unpack .../072-libcolorhug2_1.4.7-1build2_amd64.deb ...
+Unpacking libcolorhug2:amd64 (1.4.7-1build2) ...
+Selecting previously unselected package colord.
+Preparing to unpack .../073-colord_1.4.7-1build2_amd64.deb ...
+Unpacking colord (1.4.7-1build2) ...
+Selecting previously unselected package cups-common.
+Preparing to unpack .../074-cups-common_2.4.7-1.2ubuntu7.14_all.deb ...
+Unpacking cups-common (2.4.7-1.2ubuntu7.14) ...
+Selecting previously unselected package cups-client.
+Preparing to unpack .../075-cups-client_2.4.7-1.2ubuntu7.14_amd64.deb ...
+Unpacking cups-client (2.4.7-1.2ubuntu7.14) ...
+Selecting previously unselected package cups-ipp-utils.
+Preparing to unpack .../076-cups-ipp-utils_2.4.7-1.2ubuntu7.14_amd64.deb ...
+Unpacking cups-ipp-utils (2.4.7-1.2ubuntu7.14) ...
+Selecting previously unselected package poppler-utils.
+Preparing to unpack .../077-poppler-utils_24.02.0-1ubuntu9.11_amd64.deb ...
+Unpacking poppler-utils (24.02.0-1ubuntu9.11) ...
+Selecting previously unselected package libpoppler-cpp0t64:amd64.
+Preparing to unpack .../078-libpoppler-cpp0t64_24.02.0-1ubuntu9.11_amd64.deb ...
+Unpacking libpoppler-cpp0t64:amd64 (24.02.0-1ubuntu9.11) ...
+Selecting previously unselected package libqpdf29t64:amd64.
+Preparing to unpack .../079-libqpdf29t64_11.9.0-1.1ubuntu0.1_amd64.deb ...
+Unpacking libqpdf29t64:amd64 (11.9.0-1.1ubuntu0.1) ...
+Selecting previously unselected package libcupsfilters2-common.
+Preparing to unpack .../080-libcupsfilters2-common_2.0.0-0ubuntu7.2_all.deb ...
+Unpacking libcupsfilters2-common (2.0.0-0ubuntu7.2) ...
+Selecting previously unselected package libcupsfilters2t64:amd64.
+Preparing to unpack .../081-libcupsfilters2t64_2.0.0-0ubuntu7.2_amd64.deb ...
+Unpacking libcupsfilters2t64:amd64 (2.0.0-0ubuntu7.2) ...
+Selecting previously unselected package libppd2-common.
+Preparing to unpack .../082-libppd2-common_2%3a2.0.0-0ubuntu4.1_all.deb ...
+Unpacking libppd2-common (2:2.0.0-0ubuntu4.1) ...
+Selecting previously unselected package libppd2:amd64.
+Preparing to unpack .../083-libppd2_2%3a2.0.0-0ubuntu4.1_amd64.deb ...
+Unpacking libppd2:amd64 (2:2.0.0-0ubuntu4.1) ...
+Selecting previously unselected package cups-filters-core-drivers.
+Preparing to unpack .../084-cups-filters-core-drivers_2.0.0-0ubuntu4.1_amd64.deb ...
+Unpacking cups-filters-core-drivers (2.0.0-0ubuntu4.1) ...
+Selecting previously unselected package cups-core-drivers.
+Preparing to unpack .../085-cups-core-drivers_2.4.7-1.2ubuntu7.14_amd64.deb ...
+Unpacking cups-core-drivers (2.4.7-1.2ubuntu7.14) ...
+Selecting previously unselected package libfontenc1:amd64.
+Preparing to unpack .../086-libfontenc1_1%3a1.1.8-1build1_amd64.deb ...
+Unpacking libfontenc1:amd64 (1:1.1.8-1build1) ...
+Selecting previously unselected package x11-common.
+Preparing to unpack .../087-x11-common_1%3a7.7+23ubuntu3_all.deb ...
+Unpacking x11-common (1:7.7+23ubuntu3) ...
+Selecting previously unselected package xfonts-encodings.
+Preparing to unpack .../088-xfonts-encodings_1%3a1.0.5-0ubuntu2_all.deb ...
+Unpacking xfonts-encodings (1:1.0.5-0ubuntu2) ...
+Selecting previously unselected package xfonts-utils.
+Preparing to unpack .../089-xfonts-utils_1%3a7.7+6build3_amd64.deb ...
+Unpacking xfonts-utils (1:7.7+6build3) ...
+Selecting previously unselected package fonts-urw-base35.
+Preparing to unpack .../090-fonts-urw-base35_20200910-8_all.deb ...
+Unpacking fonts-urw-base35 (20200910-8) ...
+Selecting previously unselected package libgs-common.
+Preparing to unpack .../091-libgs-common_10.02.1~dfsg1-0ubuntu7.10_all.deb ...
+Unpacking libgs-common (10.02.1~dfsg1-0ubuntu7.10) ...
+Selecting previously unselected package libgs10-common.
+Preparing to unpack .../092-libgs10-common_10.02.1~dfsg1-0ubuntu7.10_all.deb ...
+Unpacking libgs10-common (10.02.1~dfsg1-0ubuntu7.10) ...
+Selecting previously unselected package libidn12:amd64.
+Preparing to unpack .../093-libidn12_1.42-1ubuntu0.1_amd64.deb ...
+Unpacking libidn12:amd64 (1.42-1ubuntu0.1) ...
+Selecting previously unselected package libijs-0.35:amd64.
+Preparing to unpack .../094-libijs-0.35_0.35-15.1build1_amd64.deb ...
+Unpacking libijs-0.35:amd64 (0.35-15.1build1) ...
+Selecting previously unselected package libjbig2dec0:amd64.
+Preparing to unpack .../095-libjbig2dec0_0.20-1ubuntu0.24.04.1_amd64.deb ...
+Unpacking libjbig2dec0:amd64 (0.20-1ubuntu0.24.04.1) ...
+Selecting previously unselected package libice6:amd64.
+Preparing to unpack .../096-libice6_2%3a1.0.10-1build3_amd64.deb ...
+Unpacking libice6:amd64 (2:1.0.10-1build3) ...
+Selecting previously unselected package libsm6:amd64.
+Preparing to unpack .../097-libsm6_2%3a1.2.3-1build3_amd64.deb ...
+Unpacking libsm6:amd64 (2:1.2.3-1build3) ...
+Selecting previously unselected package libxt6t64:amd64.
+Preparing to unpack .../098-libxt6t64_1%3a1.2.1-1.2build1_amd64.deb ...
+Unpacking libxt6t64:amd64 (1:1.2.1-1.2build1) ...
+Selecting previously unselected package libgs10:amd64.
+Preparing to unpack .../099-libgs10_10.02.1~dfsg1-0ubuntu7.10_amd64.deb ...
+Unpacking libgs10:amd64 (10.02.1~dfsg1-0ubuntu7.10) ...
+Selecting previously unselected package ghostscript.
+Preparing to unpack .../100-ghostscript_10.02.1~dfsg1-0ubuntu7.10_amd64.deb ...
+Unpacking ghostscript (10.02.1~dfsg1-0ubuntu7.10) ...
+Selecting previously unselected package cups-filters.
+Preparing to unpack .../101-cups-filters_2.0.0-0ubuntu4.1_amd64.deb ...
+Unpacking cups-filters (2.0.0-0ubuntu4.1) ...
+Selecting previously unselected package cups-ppdc.
+Preparing to unpack .../102-cups-ppdc_2.4.7-1.2ubuntu7.14_amd64.deb ...
+Unpacking cups-ppdc (2.4.7-1.2ubuntu7.14) ...
+Selecting previously unselected package cups-server-common.
+Preparing to unpack .../103-cups-server-common_2.4.7-1.2ubuntu7.14_all.deb ...
+Unpacking cups-server-common (2.4.7-1.2ubuntu7.14) ...
+Selecting previously unselected package cups.
+Preparing to unpack .../104-cups_2.4.7-1.2ubuntu7.14_amd64.deb ...
+Unpacking cups (2.4.7-1.2ubuntu7.14) ...
+Selecting previously unselected package libavahi-glib1:amd64.
+Preparing to unpack .../105-libavahi-glib1_0.8-13ubuntu6.2_amd64.deb ...
+Unpacking libavahi-glib1:amd64 (0.8-13ubuntu6.2) ...
+Selecting previously unselected package cups-browsed.
+Preparing to unpack .../106-cups-browsed_2.0.0-0ubuntu10.3_amd64.deb ...
+Unpacking cups-browsed (2.0.0-0ubuntu10.3) ...
+Selecting previously unselected package fonts-noto-mono.
+Preparing to unpack .../107-fonts-noto-mono_20201225-2_all.deb ...
+Unpacking fonts-noto-mono (20201225-2) ...
+Selecting previously unselected package ipp-usb.
+Preparing to unpack .../108-ipp-usb_0.9.24-0ubuntu3.3_amd64.deb ...
+Unpacking ipp-usb (0.9.24-0ubuntu3.3) ...
+Selecting previously unselected package libboost-iostreams1.83.0:amd64.
+Preparing to unpack .../109-libboost-iostreams1.83.0_1.83.0-2.1ubuntu3.2_amd64.deb ...
+Unpacking libboost-iostreams1.83.0:amd64 (1.83.0-2.1ubuntu3.2) ...
+Selecting previously unselected package libboost-thread1.83.0:amd64.
+Preparing to unpack .../110-libboost-thread1.83.0_1.83.0-2.1ubuntu3.2_amd64.deb ...
+Unpacking libboost-thread1.83.0:amd64 (1.83.0-2.1ubuntu3.2) ...
+Selecting previously unselected package libboost-locale1.83.0:amd64.
+Preparing to unpack .../111-libboost-locale1.83.0_1.83.0-2.1ubuntu3.2_amd64.deb ...
+Unpacking libboost-locale1.83.0:amd64 (1.83.0-2.1ubuntu3.2) ...
+Selecting previously unselected package librdmacm1t64:amd64.
+Preparing to unpack .../112-librdmacm1t64_50.0-2ubuntu0.2_amd64.deb ...
+Unpacking librdmacm1t64:amd64 (50.0-2ubuntu0.2) ...
+Selecting previously unselected package librados2.
+Preparing to unpack .../113-librados2_19.2.3-0ubuntu0.24.04.3_amd64.deb ...
+Unpacking librados2 (19.2.3-0ubuntu0.24.04.3) ...
+Selecting previously unselected package libcephfs2.
+Preparing to unpack .../114-libcephfs2_19.2.3-0ubuntu0.24.04.3_amd64.deb ...
+Unpacking libcephfs2 (19.2.3-0ubuntu0.24.04.3) ...
+Selecting previously unselected package libgphoto2-l10n.
+Preparing to unpack .../115-libgphoto2-l10n_2.5.31-2.1ubuntu1.2_all.deb ...
+Unpacking libgphoto2-l10n (2.5.31-2.1ubuntu1.2) ...
+Selecting previously unselected package liblouis-data.
+Preparing to unpack .../116-liblouis-data_3.29.0-1build1_all.deb ...
+Unpacking liblouis-data (3.29.0-1build1) ...
+Selecting previously unselected package liblouis20:amd64.
+Preparing to unpack .../117-liblouis20_3.29.0-1build1_amd64.deb ...
+Unpacking liblouis20:amd64 (3.29.0-1build1) ...
+Selecting previously unselected package liblouisutdml-data.
+Preparing to unpack .../118-liblouisutdml-data_2.12.0-3.1build1_all.deb ...
+Unpacking liblouisutdml-data (2.12.0-3.1build1) ...
+Selecting previously unselected package liblouisutdml9t64:amd64.
+Preparing to unpack .../119-liblouisutdml9t64_2.12.0-3.1build1_amd64.deb ...
+Unpacking liblouisutdml9t64:amd64 (2.12.0-3.1build1) ...
+Selecting previously unselected package libnsl2:amd64.
+Preparing to unpack .../120-libnsl2_1.3.0-3build3_amd64.deb ...
+Unpacking libnsl2:amd64 (1.3.0-3build3) ...
+Selecting previously unselected package libnss-mdns:amd64.
+Preparing to unpack .../121-libnss-mdns_0.15.1-4build1_amd64.deb ...
+Unpacking libnss-mdns:amd64 (0.15.1-4build1) ...
+Selecting previously unselected package libnss-nis:amd64.
+Preparing to unpack .../122-libnss-nis_3.1-0ubuntu7_amd64.deb ...
+Unpacking libnss-nis:amd64 (3.1-0ubuntu7) ...
+Selecting previously unselected package libpaper-utils.
+Preparing to unpack .../123-libpaper-utils_1.1.29build1_amd64.deb ...
+Unpacking libpaper-utils (1.1.29build1) ...
+Selecting previously unselected package liburing2:amd64.
+Preparing to unpack .../124-liburing2_2.5-1build1_amd64.deb ...
+Unpacking liburing2:amd64 (2.5-1build1) ...
+Selecting previously unselected package make.
+Preparing to unpack .../125-make_4.3-4.1build2_amd64.deb ...
+Unpacking make (4.3-4.1build2) ...
+Selecting previously unselected package nfs-kernel-server.
+Preparing to unpack .../126-nfs-kernel-server_1%3a2.6.4-3ubuntu5.1_amd64.deb ...
+Unpacking nfs-kernel-server (1:2.6.4-3ubuntu5.1) ...
+Selecting previously unselected package python3-gpg.
+Preparing to unpack .../127-python3-gpg_1.18.0-4.1ubuntu4_amd64.deb ...
+Unpacking python3-gpg (1.18.0-4.1ubuntu4) ...
+Selecting previously unselected package samba-ad-provision.
+Preparing to unpack .../128-samba-ad-provision_2%3a4.19.5+dfsg-4ubuntu9.8_all.deb ...
+Unpacking samba-ad-provision (2:4.19.5+dfsg-4ubuntu9.8) ...
+Selecting previously unselected package samba-dsdb-modules:amd64.
+Preparing to unpack .../129-samba-dsdb-modules_2%3a4.19.5+dfsg-4ubuntu9.8_amd64.deb ...
+Unpacking samba-dsdb-modules:amd64 (2:4.19.5+dfsg-4ubuntu9.8) ...
+Selecting previously unselected package samba-vfs-modules:amd64.
+Preparing to unpack .../130-samba-vfs-modules_2%3a4.19.5+dfsg-4ubuntu9.8_amd64.deb ...
+Unpacking samba-vfs-modules:amd64 (2:4.19.5+dfsg-4ubuntu9.8) ...
+Selecting previously unselected package sane-airscan.
+Preparing to unpack .../131-sane-airscan_0.99.29-0ubuntu4_amd64.deb ...
+Unpacking sane-airscan (0.99.29-0ubuntu4) ...
+Selecting previously unselected package ypbind-mt.
+Preparing to unpack .../132-ypbind-mt_2.7.2-3build1_amd64.deb ...
+Unpacking ypbind-mt (2.7.2-3build1) ...
+Selecting previously unselected package yp-tools.
+Preparing to unpack .../133-yp-tools_4.2.3-4build1_amd64.deb ...
+Unpacking yp-tools (4.2.3-4build1) ...
+Selecting previously unselected package ypserv.
+Preparing to unpack .../134-ypserv_4.2-2build2_amd64.deb ...
+Unpacking ypserv (4.2-2build2) ...
+Selecting previously unselected package liblouisutdml-bin.
+Preparing to unpack .../135-liblouisutdml-bin_2.12.0-3.1build1_amd64.deb ...
+Unpacking liblouisutdml-bin (2.12.0-3.1build1) ...
+Selecting previously unselected package nis.
+Preparing to unpack .../136-nis_4.5_all.deb ...
+Unpacking nis (4.5) ...
+Setting up liblcms2-2:amd64 (2.14-2ubuntu0.1) ...
+Setting up libpixman-1-0:amd64 (0.42.2-1build1) ...
+Setting up libpaper1:amd64 (1.1.29build1) ...
+
+Creating config file /etc/papersize with new version
+Setting up session-migration (0.3.9build1) ...
+Created symlink /etc/systemd/user/graphical-session-pre.target.wants/session-migration.service → /usr/lib/systemd/user/session-migration.service.
+Setting up libnfsidmap1:amd64 (1:2.6.4-3ubuntu5.1) ...
+Setting up libproxy1v5:amd64 (0.5.4-4build1) ...
+Setting up libieee1284-3t64:amd64 (0.2.11-14.1build1) ...
+Setting up liblouisutdml-data (2.12.0-3.1build1) ...
+Setting up fonts-noto-mono (20201225-2) ...
+Setting up libxrender1:amd64 (1:0.9.10-1.1build1) ...
+Setting up cups-server-common (2.4.7-1.2ubuntu7.14) ...
+Setting up libxcb-render0:amd64 (1.15-1ubuntu2) ...
+Setting up attr (1:2.5.2-1ubuntu0.1) ...
+Setting up libsnmp-base (5.9.4+dfsg-1.1ubuntu3.3) ...
+Setting up libtdb1:amd64 (1.4.10-1build1) ...
+Setting up libgusb2:amd64 (0.4.8-1build2) ...
+Setting up libijs-0.35:amd64 (0.35-15.1build1) ...
+Setting up cups-common (2.4.7-1.2ubuntu7.14) ...
+Setting up libgs-common (10.02.1~dfsg1-0ubuntu7.10) ...
+Setting up x11-common (1:7.7+23ubuntu3) ...
+Setting up update-inetd (4.53) ...
+Setting up libqpdf29t64:amd64 (11.9.0-1.1ubuntu0.1) ...
+Setting up libboost-thread1.83.0:amd64 (1.83.0-2.1ubuntu3.2) ...
+Setting up rpcbind (1.2.6-7ubuntu2) ...
+Created symlink /etc/systemd/system/multi-user.target.wants/rpcbind.service → /usr/lib/systemd/system/rpcbind.service.
+Created symlink /etc/systemd/system/sockets.target.wants/rpcbind.socket → /usr/lib/systemd/system/rpcbind.socket.
+Setting up libxcb-shm0:amd64 (1.15-1ubuntu2) ...
+Setting up libpaper-utils (1.1.29build1) ...
+Setting up samba-common (2:4.19.5+dfsg-4ubuntu9.8) ...
+
+Creating config file /etc/samba/smb.conf with new version
+Setting up libsoup-3.0-common (3.4.4-5ubuntu0.11) ...
+Setting up libgphoto2-l10n (2.5.31-2.1ubuntu1.2) ...
+Setting up libcairo2:amd64 (1.18.0-3build1) ...
+Setting up libwbclient0:amd64 (2:4.19.5+dfsg-4ubuntu9.8) ...
+Setting up libcolord2:amd64 (1.4.7-1build2) ...
+Setting up tzdata-legacy (2026e-0ubuntu0.24.04.1) ...
+Setting up colord-data (1.4.7-1build2) ...
+Setting up poppler-data (0.4.12-1) ...
+Setting up acl (2.3.2-1build1.1) ...
+Setting up libtalloc2:amd64 (2.4.2-1build2) ...
+Setting up libdconf1:amd64 (0.40.0-4ubuntu0.1) ...
+Setting up python3-tdb (1.4.10-1build1) ...
+Setting up libfontenc1:amd64 (1:1.1.8-1build1) ...
+Setting up liblouis-data (3.29.0-1build1) ...
+Setting up python3-gpg (1.18.0-4.1ubuntu4) ...
+Setting up make (4.3-4.1build2) ...
+Setting up ssl-cert (1.1.2ubuntu1) ...
+Created symlink /etc/systemd/system/multi-user.target.wants/ssl-cert.service → /usr/lib/systemd/system/ssl-cert.service.
+Setting up libjbig2dec0:amd64 (0.20-1ubuntu0.24.04.1) ...
+Setting up libboost-iostreams1.83.0:amd64 (1.83.0-2.1ubuntu3.2) ...
+Setting up libavahi-common-data:amd64 (0.8-13ubuntu6.2) ...
+Setting up tdb-tools (1.4.10-1build1) ...
+update-alternatives: using /usr/bin/tdbbackup.tdbtools to provide /usr/bin/tdbbackup (tdbbackup) in auto mode
+Setting up xfonts-encodings (1:1.0.5-0ubuntu2) ...
+Setting up libexif12:amd64 (0.6.24-1ubuntu0.24.04.1) ...
+Setting up libidn12:amd64 (1.42-1ubuntu0.1) ...
+Setting up python3-markdown (3.5.2-1) ...
+Setting up nscd (2.39-0ubuntu8.9) ...
+Created symlink /etc/systemd/system/multi-user.target.wants/nscd.service → /usr/lib/systemd/system/nscd.service.
+Setting up libltdl7:amd64 (2.4.7-7build1) ...
+Setting up libcupsfilters2-common (2.0.0-0ubuntu7.2) ...
+Setting up keyutils (1.6.3-3build1) ...
+Setting up python3-dnspython (2.6.1-1ubuntu1) ...
+Setting up libnsl2:amd64 (1.3.0-3build3) ...
+Setting up samba-ad-provision (2:4.19.5+dfsg-4ubuntu9.8) ...
+Setting up librdmacm1t64:amd64 (50.0-2ubuntu0.2) ...
+Setting up libopenjp2-7:amd64 (2.5.0-2ubuntu0.5) ...
+Setting up libgphoto2-port12t64:amd64 (2.5.31-2.1ubuntu1.2) ...
+Setting up fonts-droid-fallback (1:6.0.1r16-1.1build1) ...
+Setting up glib-networking-common (2.80.0-1build1) ...
+Setting up libsane-common (1.2.1-7build4) ...
+Setting up liburing2:amd64 (2.5-1build1) ...
+Setting up libdaemon0:amd64 (0.14-7.1ubuntu4) ...
+Setting up libnss-mdns:amd64 (0.15.1-4build1) ...
+Setting up libppd2-common (2:2.0.0-0ubuntu4.1) ...
+Setting up ypbind-mt (2.7.2-3build1) ...
+Setting up libtevent0t64:amd64 (0.16.1-2build1) ...
+Setting up liblouis20:amd64 (3.29.0-1build1) ...
+Setting up glib-networking-services (2.80.0-1build1) ...
+Setting up libice6:amd64 (2:1.0.10-1build3) ...
+Setting up librados2 (19.2.3-0ubuntu0.24.04.3) ...
+Setting up libsnmp40t64:amd64 (5.9.4+dfsg-1.1ubuntu3.3) ...
+Setting up libpoppler134:amd64 (24.02.0-1ubuntu9.11) ...
+Setting up python3-talloc:amd64 (2.4.2-1build2) ...
+Setting up chrony (4.5-1ubuntu4.2) ...
+
+Creating config file /etc/chrony/chrony.conf with new version
+
+Creating config file /etc/chrony/chrony.keys with new version
+dpkg-statoverride: warning: --update given but /var/log/chrony does not exist
+Created symlink /etc/systemd/system/chronyd.service → /usr/lib/systemd/system/chrony.service.
+Created symlink /etc/systemd/system/multi-user.target.wants/chrony.service → /usr/lib/systemd/system/chrony.service.
+Setting up libavahi-common3:amd64 (0.8-13ubuntu6.2) ...
+Setting up libboost-locale1.83.0:amd64 (1.83.0-2.1ubuntu3.2) ...
+Setting up libcolorhug2:amd64 (1.4.7-1build2) ...
+Setting up dconf-service (0.40.0-4ubuntu0.1) ...
+Setting up xfonts-utils (1:7.7+6build3) ...
+Setting up libcephfs2 (19.2.3-0ubuntu0.24.04.3) ...
+Setting up nfs-common (1:2.6.4-3ubuntu5.1) ...
+
+Creating config file /etc/idmapd.conf with new version
+
+Creating config file /etc/nfs.conf with new version
+info: Selecting UID from range 100 to 999 ...
+
+info: Adding system user `statd' (UID 111) ...
+info: Adding new user `statd' (UID 111) with group `nogroup' ...
+info: Not creating home directory `/var/lib/nfs'.
+Created symlink /etc/systemd/system/multi-user.target.wants/nfs-client.target → /usr/lib/systemd/system/nfs-client.target.
+Created symlink /etc/systemd/system/remote-fs.target.wants/nfs-client.target → /usr/lib/systemd/system/nfs-client.target.
+auth-rpcgss-module.service is a disabled or a static unit, not starting it.
+nfs-idmapd.service is a disabled or a static unit, not starting it.
+nfs-utils.service is a disabled or a static unit, not starting it.
+proc-fs-nfsd.mount is a disabled or a static unit, not starting it.
+rpc-gssd.service is a disabled or a static unit, not starting it.
+rpc-statd-notify.service is a disabled or a static unit, not starting it.
+rpc-statd.service is a disabled or a static unit, not starting it.
+rpc-svcgssd.service is a disabled or a static unit, not starting it.
+Setting up libpoppler-glib8t64:amd64 (24.02.0-1ubuntu9.11) ...
+Setting up libnss-nis:amd64 (3.1-0ubuntu7) ...
+Setting up libgphoto2-6t64:amd64 (2.5.31-2.1ubuntu1.2) ...
+No diversion 'diversion of /lib/udev/hwdb.d/20-libgphoto2-6.hwdb to /lib/udev/hwdb.d/20-libgphoto2-6.hwdb.usr-is-merged by usr-is-merged', none removed.
+No diversion 'diversion of /lib/udev/rules.d/60-libgphoto2-6.rules to /lib/udev/rules.d/60-libgphoto2-6.rules.usr-is-merged by usr-is-merged', none removed.
+Setting up libpoppler-cpp0t64:amd64 (24.02.0-1ubuntu9.11) ...
+Setting up ypserv (4.2-2build2) ...
+
+Creating config file /var/yp/Makefile with new version
+
+Creating config file /etc/netgroup with new version
+
+Creating config file /etc/ypserv.conf with new version
+
+Creating config file /etc/ypserv.securenets with new version
+Setting up yp-tools (4.2.3-4build1) ...
+
+Creating config file /var/yp/nicknames with new version
+Setting up liblouisutdml9t64:amd64 (2.12.0-3.1build1) ...
+Setting up libavahi-glib1:amd64 (0.8-13ubuntu6.2) ...
+Setting up poppler-utils (24.02.0-1ubuntu9.11) ...
+Setting up libavahi-core7:amd64 (0.8-13ubuntu6.2) ...
+Setting up libldb2:amd64 (2:2.8.0+samba4.19.5+dfsg-4ubuntu9.8) ...
+Setting up libsm6:amd64 (2:1.2.3-1build3) ...
+Setting up libavahi-client3:amd64 (0.8-13ubuntu6.2) ...
+Setting up nfs-kernel-server (1:2.6.4-3ubuntu5.1) ...
+Created symlink /etc/systemd/system/nfs-mountd.service.requires/fsidd.service → /usr/lib/systemd/system/fsidd.service.
+Created symlink /etc/systemd/system/nfs-server.service.requires/fsidd.service → /usr/lib/systemd/system/fsidd.service.
+Created symlink /etc/systemd/system/nfs-client.target.wants/nfs-blkmap.service → /usr/lib/systemd/system/nfs-blkmap.service.
+Created symlink /etc/systemd/system/multi-user.target.wants/nfs-server.service → /usr/lib/systemd/system/nfs-server.service.
+nfs-mountd.service is a disabled or a static unit, not starting it.
+nfsdcld.service is a disabled or a static unit, not starting it.
+
+Creating config file /etc/exports with new version
+
+Creating config file /etc/default/nfs-kernel-server with new version
+Setting up dconf-gsettings-backend:amd64 (0.40.0-4ubuntu0.1) ...
+Setting up sane-airscan (0.99.29-0ubuntu4) ...
+Setting up nis (4.5) ...
+Setting up samba-libs:amd64 (2:4.19.5+dfsg-4ubuntu9.8) ...
+Setting up fonts-urw-base35 (20200910-8) ...
+Setting up libsane1:amd64 (1.2.1-7build4) ...
+No diversion 'diversion of /lib/udev/hwdb.d/20-sane.hwdb to /lib/udev/hwdb.d/20-sane.hwdb.usr-is-merged by usr-is-merged', none removed.
+No diversion 'diversion of /lib/udev/rules.d/60-libsane1.rules to /lib/udev/rules.d/60-libsane1.rules.usr-is-merged by usr-is-merged', none removed.
+No diversion 'diversion of /lib/udev/rules.d/99-libsane1.rules to /lib/udev/rules.d/99-libsane1.rules.usr-is-merged by usr-is-merged', none removed.
+Adding scanner group...
+Setting up liblouisutdml-bin (2.12.0-3.1build1) ...
+Setting up libxt6t64:amd64 (1:1.2.1-1.2build1) ...
+Setting up python3-ldb (2:2.8.0+samba4.19.5+dfsg-4ubuntu9.8) ...
+Setting up avahi-daemon (0.8-13ubuntu6.2) ...
+Created symlink /etc/systemd/system/dbus-org.freedesktop.Avahi.service → /usr/lib/systemd/system/avahi-daemon.service.
+Created symlink /etc/systemd/system/multi-user.target.wants/avahi-daemon.service → /usr/lib/systemd/system/avahi-daemon.service.
+Created symlink /etc/systemd/system/sockets.target.wants/avahi-daemon.socket → /usr/lib/systemd/system/avahi-daemon.socket.
+Setting up samba-dsdb-modules:amd64 (2:4.19.5+dfsg-4ubuntu9.8) ...
+Setting up sane-utils (1.2.1-7build4) ...
+Adding saned group and user...
+saned.socket is a disabled or a static unit, not starting it.
+Setting up libcups2t64:amd64 (2.4.7-1.2ubuntu7.14) ...
+Setting up python3-samba (2:4.19.5+dfsg-4ubuntu9.8) ...
+Setting up cups-ipp-utils (2.4.7-1.2ubuntu7.14) ...
+Setting up gsettings-desktop-schemas (46.1-0ubuntu1) ...
+Setting up libgs10-common (10.02.1~dfsg1-0ubuntu7.10) ...
+Setting up ipp-usb (0.9.24-0ubuntu3.3) ...
+ipp-usb.service is a disabled or a static unit, not starting it.
+Setting up cups-ppdc (2.4.7-1.2ubuntu7.14) ...
+Setting up samba-vfs-modules:amd64 (2:4.19.5+dfsg-4ubuntu9.8) ...
+Setting up colord (1.4.7-1build2) ...
+colord.service is a disabled or a static unit, not starting it.
+Setting up cups-client (2.4.7-1.2ubuntu7.14) ...
+info: Selecting GID from range 100 to 999 ...
+info: Adding group `lpadmin' (GID 118) ...
+Setting up samba-common-bin (2:4.19.5+dfsg-4ubuntu9.8) ...
+Setting up libcupsfilters2t64:amd64 (2.0.0-0ubuntu7.2) ...
+Setting up samba (2:4.19.5+dfsg-4ubuntu9.8) ...
+Created symlink /etc/systemd/system/smb.service → /usr/lib/systemd/system/smbd.service.
+Created symlink /etc/systemd/system/multi-user.target.wants/smbd.service → /usr/lib/systemd/system/smbd.service.
+Created symlink /etc/systemd/system/nmb.service → /usr/lib/systemd/system/nmbd.service.
+Created symlink /etc/systemd/system/multi-user.target.wants/nmbd.service → /usr/lib/systemd/system/nmbd.service.
+Created symlink /etc/systemd/system/samba.service → /usr/lib/systemd/system/samba-ad-dc.service.
+Created symlink /etc/systemd/system/multi-user.target.wants/samba-ad-dc.service → /usr/lib/systemd/system/samba-ad-dc.service.
+Setting up libgs10:amd64 (10.02.1~dfsg1-0ubuntu7.10) ...
+Setting up ghostscript (10.02.1~dfsg1-0ubuntu7.10) ...
+Setting up libppd2:amd64 (2:2.0.0-0ubuntu4.1) ...
+Setting up cups-filters-core-drivers (2.0.0-0ubuntu4.1) ...
+Setting up cups-filters (2.0.0-0ubuntu4.1) ...
+Processing triggers for libc-bin (2.39-0ubuntu8.9) ...
+Processing triggers for ufw (0.36.2-6) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Processing triggers for libglib2.0-0t64:amd64 (2.80.0-6ubuntu3.10) ...
+Processing triggers for dbus (1.14.10-4ubuntu4.1) ...
+Processing triggers for udev (255.4-1ubuntu8.18) ...
+Setting up glib-networking:amd64 (2.80.0-1build1) ...
+Setting up libsoup-3.0-0:amd64 (3.4.4-5ubuntu0.11) ...
+Setting up libsnapd-glib-2-1:amd64 (1.64-0ubuntu5) ...
+Setting up cups-daemon (2.4.7-1.2ubuntu7.14) ...
+Created symlink /etc/systemd/system/multi-user.target.wants/cups.path → /usr/lib/systemd/system/cups.path.
+Created symlink /etc/systemd/system/printer.target.wants/cups.service → /usr/lib/systemd/system/cups.service.
+Created symlink /etc/systemd/system/multi-user.target.wants/cups.service → /usr/lib/systemd/system/cups.service.
+Created symlink /etc/systemd/system/sockets.target.wants/cups.socket → /usr/lib/systemd/system/cups.socket.
+Setting up cups-browsed (2.0.0-0ubuntu10.3) ...
+info: Selecting UID from range 100 to 999 ...
+
+info: Adding system user `cups-browsed' (UID 115) ...
+info: Adding new user `cups-browsed' (UID 115) with group `lpadmin' ...
+info: Not creating `/nonexistent'.
+Created symlink /etc/systemd/system/multi-user.target.wants/cups-browsed.service → /usr/lib/systemd/system/cups-browsed.service.
+Setting up cups-core-drivers (2.4.7-1.2ubuntu7.14) ...
+Setting up cups (2.4.7-1.2ubuntu7.14) ...
+Updating PPD files for cups ...
+Updating PPD files for cups-filters ...
+Processing triggers for libc-bin (2.39-0ubuntu8.9) ...
+Processing triggers for ufw (0.36.2-6) ...
+Scanning processes...
+Scanning linux images...
+
+Running kernel seems to be up-to-date.
+
+No services need to be restarted.
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+ubuntu@nutresa-server:~$ cat /etc/defaultdomain
+cat: /etc/defaultdomain: No such file or directory
+ubuntu@nutresa-server:~$ domainname
+(none)
+ubuntu@nutresa-server:~$ cat /etc/defaultdomain
+domainname
+cat: /etc/defaultdomain: No such file or directory
+(none)
+ubuntu@nutresa-server:~$ echo "nutresa.local" | sudo tee /etc/defaultdomain
+sudo domainname nutresa.local
+nutresa.local
+ubuntu@nutresa-server:~$ cat /etc/defaultdomain
+domainname
+nutresa.local
+nutresa.local
+ubuntu@nutresa-server:~$ hostname -f
+cat /etc/hosts
+nutresa-server
+# Your system has configured 'manage_etc_hosts' as True.
+# As a result, if you wish for changes to this file to persist
+# then you will need to either
+# a.) make changes to the master file in /etc/cloud/templates/hosts.debian.tmpl
+# b.) change or remove the value of 'manage_etc_hosts' in
+#     /etc/cloud/cloud.cfg or cloud-config from user-data
+#
+127.0.1.1 nutresa-server nutresa-server
+127.0.0.1 localhost
+
+# The following lines are desirable for IPv6 capable hosts
+::1 localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+
+ubuntu@nutresa-server:~$ ip -4 addr show | grep inet
+    inet 127.0.0.1/8 scope host lo
+    inet 172.31.38.240/20 metric 100 brd 172.31.47.255 scope global dynamic eth0
+    inet 192.168.1.34/24 metric 200 brd 192.168.1.255 scope global dynamic eth1
+ubuntu@nutresa-server:~$ sudo nano /etc/cloud/templates/hosts.debian.tmpl
+ubuntu@nutresa-server:~$ sudo nano /etc/hosts
+ubuntu@nutresa-server:~$ hostname -f
+getent hosts nutresa-server
+nutresa-server
+192.168.1.34    nutresa-server
+ubuntu@nutresa-server:~$ sudo /usr/lib/yp/ypinit -m
+
+At this point, we have to construct a list of the hosts which will run NIS
+servers.  nutresa-server is in the list of NIS server hosts.  Please continue to add
+the names for the other hosts, one per line.  When you are done with the
+list, type a <control D>.
+        next host to add:  nutresa-server
+        next host to add:
+The current list of NIS servers looks like this:
+
+nutresa-server
+
+Is this correct?  [y/n: y]  y
+We need a few minutes to build the databases...
+Building /var/yp/nutresa.local/ypservers...
+Running /var/yp/Makefile...
+gmake[1]: Entering directory '/var/yp/nutresa.local'
+Updating passwd.byname...
+failed to send 'clear' to local ypserv: RPC: Program not registeredUpdating passwd.byuid...
+failed to send 'clear' to local ypserv: RPC: Program not registeredUpdating group.byname...
+failed to send 'clear' to local ypserv: RPC: Program not registeredUpdating group.bygid...
+failed to send 'clear' to local ypserv: RPC: Program not registeredUpdating hosts.byname...
+failed to send 'clear' to local ypserv: RPC: Program not registeredUpdating hosts.byaddr...
+failed to send 'clear' to local ypserv: RPC: Program not registeredUpdating rpc.byname...
+failed to send 'clear' to local ypserv: RPC: Program not registeredUpdating rpc.bynumber...
+failed to send 'clear' to local ypserv: RPC: Program not registeredUpdating services.byname...
+failed to send 'clear' to local ypserv: RPC: Program not registeredUpdating services.byservicename...
+failed to send 'clear' to local ypserv: RPC: Program not registeredUpdating netid.byname...
+failed to send 'clear' to local ypserv: RPC: Program not registeredUpdating protocols.bynumber...
+failed to send 'clear' to local ypserv: RPC: Program not registeredUpdating protocols.byname...
+failed to send 'clear' to local ypserv: RPC: Program not registeredUpdating netgroup...
+failed to send 'clear' to local ypserv: RPC: Program not registeredUpdating netgroup.byhost...
+failed to send 'clear' to local ypserv: RPC: Program not registeredUpdating netgroup.byuser...
+failed to send 'clear' to local ypserv: RPC: Program not registeredUpdating shadow.byname...
+failed to send 'clear' to local ypserv: RPC: Program not registeredgmake[1]: Leaving directory '/var/yp/nutresa.local'
+
+nutresa-server has been set up as a NIS master server.
+
+Now you can run ypinit -s nutresa-server on all slave server.
+ubuntu@nutresa-server:~$ domainname
+nutresa.local
+ubuntu@nutresa-server:~$ sudo systemctl enable --now rpcbind ypserv yppasswdd
+sudo systemctl restart ypserv
+Synchronizing state of rpcbind.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable rpcbind
+Synchronizing state of ypserv.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable ypserv
+Synchronizing state of yppasswdd.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable yppasswdd
+Created symlink /etc/systemd/system/multi-user.target.wants/ypserv.service → /usr/lib/systemd/system/ypserv.service.
+Created symlink /etc/systemd/system/multi-user.target.wants/yppasswdd.service → /usr/lib/systemd/system/yppasswdd.service.
+ubuntu@nutresa-server:~$ rpcinfo -p | grep yp
+ypwhich
+ypcat passwd
+    100009    1   udp    878  yppasswdd
+    100009    1   tcp    878  yppasswdd
+    100004    2   udp    888  ypserv
+    100004    1   udp    888  ypserv
+    100004    2   tcp    888  ypserv
+    100004    1   tcp    888  ypserv
+ypwhich: Can't communicate with ypbind
+No such map passwd.byname. Reason: Can't bind to server which serves this domain
+ubuntu@nutresa-server:~$ sudo apt update
+Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Get:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Get:5 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1445 kB]
+Get:6 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1711 kB]
+Fetched 3282 kB in 3s (1255 kB/s)
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+3 packages can be upgraded. Run 'apt list --upgradable' to see them.
+ubuntu@nutresa-server:~$ sudo apt install -y chrony
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+chrony is already the newest version (4.5-1ubuntu4.2).
+0 upgraded, 0 newly installed, 0 to remove and 3 not upgraded.
+ubuntu@nutresa-server:~$ sudo systemctl enable --now chrony
+Synchronizing state of chrony.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable chrony
+ubuntu@nutresa-server:~$ sudo systemctl status chrony
+● chrony.service - chrony, an NTP client/server
+     Loaded: loaded (/usr/lib/systemd/system/chrony.service; enabled; preset: enabled)
+     Active: active (running) since Tue 2026-11-10 16:32:43 -05; 1h 16min ago
+       Docs: man:chronyd(8)
+             man:chronyc(1)
+             man:chrony.conf(5)
+   Main PID: 4614 (chronyd)
+      Tasks: 2 (limit: 4614)
+     Memory: 1.4M (peak: 2.1M)
+        CPU: 150ms
+     CGroup: /system.slice/chrony.service
+             ├─4614 /usr/sbin/chronyd -F 1
+             └─4615 /usr/sbin/chronyd -F 1
+
+Nov 10 16:32:43 nutresa-server systemd[1]: Starting chrony.service - chrony, an NTP client/server...
+Nov 10 16:32:43 nutresa-server chronyd[4614]: chronyd version 4.5 starting (+CMDMON +NTP +REFCLOCK +RTC +PRIVDROP +SCFILTER +SIGND +>
+Nov 10 16:32:43 nutresa-server chronyd[4614]: Loaded 0 symmetric keys
+Nov 10 16:32:43 nutresa-server chronyd[4614]: Initial frequency 5.944 ppm
+Nov 10 16:32:43 nutresa-server chronyd[4614]: Using right/UTC timezone to obtain leap second data
+Nov 10 16:32:43 nutresa-server chronyd[4614]: Loaded seccomp filter (level 1)
+Nov 10 16:32:43 nutresa-server systemd[1]: Started chrony.service - chrony, an NTP client/server.
+Nov 10 16:32:49 nutresa-server chronyd[4614]: Selected source 91.189.91.157 (ntp.ubuntu.com)
+Nov 10 16:32:49 nutresa-server chronyd[4614]: System clock TAI offset set to 37 seconds
+Nov 10 16:33:54 nutresa-server chronyd[4614]: Selected source 38.19.83.110 (0.ubuntu.pool.ntp.org)
+
+ubuntu@nutresa-server:~$ sudo nano /etc/chrony/chrony.conf
+ubuntu@nutresa-server:~$ sudo systemctl restart chrony
+ubuntu@nutresa-server:~$ chronyc sources -v
+
+  .-- Source mode  '^' = server, '=' = peer, '#' = local clock.
+ / .- Source state '*' = current best, '+' = combined, '-' = not combined,
+| /             'x' = may be in error, '~' = too variable, '?' = unusable.
+||                                                 .- xxxx [ yyyy ] +/- zzzz
+||      Reachability register (octal) -.           |  xxxx = adjusted offset,
+||      Log2(Polling interval) --.      |          |  yyyy = measured offset,
+||                                \     |          |  zzzz = estimated error.
+||                                 |    |           \
+MS Name/IP address         Stratum Poll Reach LastRx Last sample
+===============================================================================
+^- prod-ntp-3.ntp4.ps5.cano>     2   6    37    10    +12ms[  +12ms] +/-  100ms
+^- prod-ntp-5.ntp1.ps5.cano>     2   6    37    10  +4458us[+4458us] +/-   93ms
+^* alphyn.canonical.com          2   6    37    12  -1227ns[ +307us] +/-   68ms
+^- prod-ntp-4.ntp1.ps5.cano>     2   6    37    10  +4889us[+4889us] +/-   93ms
+^- 0.cl.ntp.edgeuno.com          2   6    37    12    -38ms[  -38ms] +/-  213ms
+^- 0.co.ntp.edgeuno.com          2   6    37    11  -1011us[-1011us] +/-  144ms
+^- 1.co.ntp.edgeuno.com          2   6    17    49   -146us[ +162us] +/-  141ms
+^? bng01.chrl01-nc.us.uniti>     1   6    30    48  +5137us[+5445us] +/-   52ms
+ubuntu@nutresa-server:~$ chronyc tracking
+Reference ID    : 5BBD5B9D (alphyn.canonical.com)
+Stratum         : 3
+Ref time (UTC)  : Tue Nov 10 22:55:12 2026
+System time     : 0.000137431 seconds fast of NTP time
+Last offset     : +0.000140441 seconds
+RMS offset      : 0.001591483 seconds
+Frequency       : 30.339 ppm fast
+Residual freq   : +4.602 ppm
+Skew            : 1.496 ppm
+Root delay      : 0.132102475 seconds
+Root dispersion : 0.002445091 seconds
+Update interval : 64.2 seconds
+Leap status     : Normal
+ubuntu@nutresa-server:~$ sudo ufw allow from 192.168.1.0/24 to any port 123 proto udp
+Rules updated
+ubuntu@nutresa-server:~$ sudo apt update
+Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+3 packages can be upgraded. Run 'apt list --upgradable' to see them.
+ubuntu@nutresa-server:~$ sudo apt install -y nfs-kernel-server
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+nfs-kernel-server is already the newest version (1:2.6.4-3ubuntu5.1).
+0 upgraded, 0 newly installed, 0 to remove and 3 not upgraded.
+ubuntu@nutresa-server:~$ sudo systemctl enable --now nfs-kernel-server
+Synchronizing state of nfs-kernel-server.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable nfs-kernel-server
+ubuntu@nutresa-server:~$ sudo systemctl status nfs-kernel-server
+● nfs-server.service - NFS server and services
+     Loaded: loaded (/usr/lib/systemd/system/nfs-server.service; enabled; preset: enabled)
+     Active: active (exited) since Tue 2026-11-10 16:32:49 -05; 1h 41min ago
+   Main PID: 5730 (code=exited, status=0/SUCCESS)
+        CPU: 10ms
+
+Nov 10 16:32:49 nutresa-server systemd[1]: Starting nfs-server.service - NFS server and services...
+Nov 10 16:32:49 nutresa-server exportfs[5729]: exportfs: can't open /etc/exports for reading
+Nov 10 16:32:49 nutresa-server systemd[1]: Finished nfs-server.service - NFS server and services.
+ubuntu@nutresa-server:~$ sudo exportfs -v
+ubuntu@nutresa-server:~$ sudo groupadd -g 2000 nutresa
+ubuntu@nutresa-server:~$ sudo mkdir -p /srv/nfs/nutresa
+ubuntu@nutresa-server:~$ sudo chown root:nutresa /srv/nfs/nutresa
+sudo chmod 2770 /srv/nfs/nutresa
+ubuntu@nutresa-server:~$ ls -ld /srv/nfs/nutresa
+drwxrws--- 2 root nutresa 4096 Nov 10 18:17 /srv/nfs/nutresa
+ubuntu@nutresa-server:~$ sudo nano /etc/exports
+ubuntu@nutresa-server:~$ sudo nano /etc/exports
+ubuntu@nutresa-server:~$ sudo exportfs -ra
+ubuntu@nutresa-server:~$ sudo exportfs -v
+/srv/nfs/nutresa
+                192.168.1.0/24(sync,wdelay,hide,no_subtree_check,fsid=0,sec=sys,rw,secure,root_squash,no_all_squash)
+ubuntu@nutresa-server:~$ sudo ss -lntp | grep 2049
+LISTEN 0      64           0.0.0.0:2049       0.0.0.0:*
+LISTEN 0      64              [::]:2049          [::]:*
+ubuntu@nutresa-server:~$ sudo ufw allow from 192.168.1.0/24 to any port 2049 proto tcp
+Rules updated
+ubuntu@nutresa-server:~$ ls -l /srv/nfs/nutresa/
+ls: cannot open directory '/srv/nfs/nutresa/': Permission denied
+ubuntu@nutresa-server:~$ ls -ld /srv/nfs/nutresa
+drwxrws--- 2 root nutresa 4096 Nov 10 19:08 /srv/nfs/nutresa
+ubuntu@nutresa-server:~$ sudo ls -l /srv/nfs/nutresa/
+total 4
+-rw-rw-r-- 1 ubuntu nutresa 36 Nov 10 19:08 prueba_cliente.txt
+ubuntu@nutresa-server:~$ sudo usermod -aG nutresa ubuntu
+ubuntu@nutresa-server:~$ newgrp nutresa
+ubuntu@nutresa-server:~$ groups
+ls -l /srv/nfs/nutresa/
+nutresa adm cdrom sudo dip lxd ubuntu
+total 4
+-rw-rw-r-- 1 ubuntu nutresa 36 Nov 10 19:08 prueba_cliente.txt
+ubuntu@nutresa-server:~$ ls -l /srv/nfs/nutresa/
+total 4
+-rw-rw-r-- 1 ubuntu nutresa 36 Nov 10 19:08 prueba_cliente.txt
+ubuntu@nutresa-server:~$ cat /srv/nfs/nutresa/prueba_cliente.txt
+Prueba NFS desde el cliente Nutresa
+ubuntu@nutresa-server:~$ echo "Documento creado desde el servidor Nutresa" | sudo tee /srv/nfs/nutresa/prueba_servidor.txt
+Documento creado desde el servidor Nutresa
+ubuntu@nutresa-server:~$ hostname
+nutresa-server
+ubuntu@nutresa-server:~$ ip -br addr
+lo               UNKNOWN        127.0.0.1/8 ::1/128
+eth0             UP             172.31.38.240/20 metric 100 fe80::5054:ff:fecc:8ccb/64
+eth1             UP             192.168.1.34/24 metric 200 fe80::5054:ff:fe1d:9907/64
+ubuntu@nutresa-server:~$ getent group nutresa
+nutresa:x:2000:ubuntu
+ubuntu@nutresa-server:~$ apt-cache policy nis ypserv
+nis:
+  Installed: 4.5
+  Candidate: 4.5
+  Version table:
+ *** 4.5 500
+        500 http://archive.ubuntu.com/ubuntu noble/universe amd64 Packages
+        100 /var/lib/dpkg/status
+ypserv:
+  Installed: 4.2-2build2
+  Candidate: 4.2-2build2
+  Version table:
+ *** 4.2-2build2 500
+        500 http://archive.ubuntu.com/ubuntu noble/universe amd64 Packages
+        100 /var/lib/dpkg/status
+ubuntu@nutresa-server:~$ sudo apt update
+Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
+Get:2 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+Hit:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Get:5 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [1160 kB]
+Get:6 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1228 kB]
+Fetched 2514 kB in 3s (885 kB/s)
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+3 packages can be upgraded. Run 'apt list --upgradable' to see them.
+ubuntu@nutresa-server:~$ sudo apt install -y nis
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+nis is already the newest version (4.5).
+0 upgraded, 0 newly installed, 0 to remove and 3 not upgraded.
+ubuntu@nutresa-server:~$ dpkg -l | grep -E 'nis|ypserv|rpcbind'
+ii  iptables                        1.8.10-3ubuntu2                                  amd64        administration tools for packet filtering and NAT
+ii  landscape-common                24.02-0ubuntu5.7                                 amd64        Landscape administration system client - Common files
+ii  libgssapi-krb5-2:amd64          1.20.1-6ubuntu2.10                               amd64        MIT Kerberos runtime libraries - krb5 GSS-API Mechanism
+ii  libnss-nis:amd64                3.1-0ubuntu7                                     amd64        NSS module for using NIS as a naming service
+ii  libopeniscsiusr                 2.1.9-3ubuntu5.5                                 amd64        iSCSI userspace library
+ii  libunistring5:amd64             1.1-2build1.1                                    amd64        Unicode string library for C
+ii  nis                             4.5                                              all          Network Information Service (NIS)
+ii  passwd                          1:4.13+dfsg1-4ubuntu3.2                          amd64        change and administer password and group data
+ii  polkitd                         124-2ubuntu1.24.04.4                             amd64        framework for managing administrative policies and privileges
+ii  rpcbind                         1.2.6-7ubuntu2                                   amd64        converts RPC program numbers into universal addresses
+ii  ypserv                          4.2-2build2                                      amd64        Server daemon for working with Network Information System (NIS)
+ubuntu@nutresa-server:~$ command -v ypserv
+/usr/sbin/ypserv
+ubuntu@nutresa-server:~$ command -v ypinit
+ubuntu@nutresa-server:~$ sudo apt install -y ypserv rpcbind
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+ypserv is already the newest version (4.2-2build2).
+ypserv set to manually installed.
+rpcbind is already the newest version (1.2.6-7ubuntu2).
+0 upgraded, 0 newly installed, 0 to remove and 3 not upgraded.
+ubuntu@nutresa-server:~$ dpkg -l | grep -E 'nis|ypserv|yp-tools|rpcbind'
+ii  iptables                        1.8.10-3ubuntu2                                  amd64        administration tools for packet filtering and NAT
+ii  landscape-common                24.02-0ubuntu5.7                                 amd64        Landscape administration system client - Common files
+ii  libgssapi-krb5-2:amd64          1.20.1-6ubuntu2.10                               amd64        MIT Kerberos runtime libraries - krb5 GSS-API Mechanism
+ii  libnss-nis:amd64                3.1-0ubuntu7                                     amd64        NSS module for using NIS as a naming service
+ii  libopeniscsiusr                 2.1.9-3ubuntu5.5                                 amd64        iSCSI userspace library
+ii  libunistring5:amd64             1.1-2build1.1                                    amd64        Unicode string library for C
+ii  nis                             4.5                                              all          Network Information Service (NIS)
+ii  passwd                          1:4.13+dfsg1-4ubuntu3.2                          amd64        change and administer password and group data
+ii  polkitd                         124-2ubuntu1.24.04.4                             amd64        framework for managing administrative policies and privileges
+ii  rpcbind                         1.2.6-7ubuntu2                                   amd64        converts RPC program numbers into universal addresses
+ii  yp-tools                        4.2.3-4build1                                    amd64        Tools for working with Network Information System (NIS)
+ii  ypserv                          4.2-2build2                                      amd64        Server daemon for working with Network Information System (NIS)
+ubuntu@nutresa-server:~$ command -v ypserv
+command -v ypinit
+/usr/sbin/ypserv
+ubuntu@nutresa-server:~$ echo "nutresa.local" | sudo tee /etc/defaultdomain
+nutresa.local
+ubuntu@nutresa-server:~$ sudo domainname nutresa.local
+ubuntu@nutresa-server:~$ domainname
+nutresa.local
+ubuntu@nutresa-server:~$ sudo nano /etc/default/nis
+ubuntu@nutresa-server:~$ sudo systemctl restart ypserv yppasswdd
+ubuntu@nutresa-server:~$ rpcinfo -p | grep -E 'ypserv|yppasswdd'
+sudo ss -lntup | grep -E '1011|1012'
+    100004    2   udp   1011  ypserv
+    100004    1   udp   1011  ypserv
+    100004    2   tcp   1011  ypserv
+    100004    1   tcp   1011  ypserv
+    100009    1   udp   1012  yppasswdd
+    100009    1   tcp   1012  yppasswdd
+udp   UNCONN 0      0                 0.0.0.0:1011       0.0.0.0:*    users:(("ypserv",pid=9570,fd=5))
+udp   UNCONN 0      0                 0.0.0.0:1012       0.0.0.0:*    users:(("rpc.yppasswdd",pid=9575,fd=5))
+udp   UNCONN 0      0                    [::]:1011          [::]:*    users:(("ypserv",pid=9570,fd=7))
+udp   UNCONN 0      0                    [::]:1012          [::]:*    users:(("rpc.yppasswdd",pid=9575,fd=7))
+tcp   LISTEN 0      4096              0.0.0.0:1012       0.0.0.0:*    users:(("rpc.yppasswdd",pid=9575,fd=6))
+tcp   LISTEN 0      4096              0.0.0.0:1011       0.0.0.0:*    users:(("ypserv",pid=9570,fd=6))
+tcp   LISTEN 0      4096                 [::]:1012          [::]:*    users:(("rpc.yppasswdd",pid=9575,fd=8))
+tcp   LISTEN 0      4096                 [::]:1011          [::]:*    users:(("ypserv",pid=9570,fd=8))
+ubuntu@nutresa-server:~$ sudo nano /etc/default/nis
+ubuntu@nutresa-server:~$ sudo nano /etc/ypserv.securenets
+ubuntu@nutresa-server:~$ sudo nano /etc/ypserv.securenets
+ubuntu@nutresa-server:~$ sudo nano /etc/ypserv.securenets
+ubuntu@nutresa-server:~$ getent group 2000
+nutresa:x:2000:ubuntu
+ubuntu@nutresa-server:~$ sudo useradd -m -u 2101 -g 2000 -s /bin/bash nisprueba
+ubuntu@nutresa-server:~$ sudo passwd nisprueba
+New password:
+Retype new password:
+passwd: password updated successfully
+ubuntu@nutresa-server:~$ id nisprueba
+uid=2101(nisprueba) gid=2000(nutresa) groups=2000(nutresa)
+ubuntu@nutresa-server:~$ sudo nano /etc/ypserv.conf
+ubuntu@nutresa-server:~$ sudo /usr/lib/yp/ypinit -m
+
+At this point, we have to construct a list of the hosts which will run NIS
+servers.  nutresa-server is in the list of NIS server hosts.  Please continue to add
+the names for the other hosts, one per line.  When you are done with the
+list, type a <control D>.
+        next host to add:  nutresa-server
+        next host to add:
+        next host to add:  ^C
+ubuntu@nutresa-server:~$ sudo make -C /var/yp
+make: Entering directory '/var/yp'
+gmake[1]: Entering directory '/var/yp/nutresa.local'
+Updating passwd.byname...
+Updating passwd.byuid...
+Updating group.byname...
+Updating group.bygid...
+Updating hosts.byname...
+Updating hosts.byaddr...
+Updating rpc.byname...
+Updating rpc.bynumber...
+Updating services.byname...
+Updating services.byservicename...
+Updating netid.byname...
+Updating protocols.bynumber...
+Updating protocols.byname...
+Updating netgroup...
+Updating netgroup.byhost...
+Updating netgroup.byuser...
+Updating shadow.byname...
+gmake[1]: Leaving directory '/var/yp/nutresa.local'
+make: Leaving directory '/var/yp'
+ubuntu@nutresa-server:~$ ls -l /var/yp/nutresa.local/
+total 384
+-rw------- 1 root root  16384 Nov 10 20:16 group.bygid
+-rw------- 1 root root  16384 Nov 10 20:16 group.byname
+-rw------- 1 root root  16384 Nov 10 20:16 hosts.byaddr
+-rw------- 1 root root  16384 Nov 10 20:16 hosts.byname
+-rw------- 1 root root  16384 Nov 10 20:16 netgroup
+-rw------- 1 root root  16384 Nov 10 20:16 netgroup.byhost
+-rw------- 1 root root  16384 Nov 10 20:16 netgroup.byuser
+-rw------- 1 root root  16384 Nov 10 20:16 netid.byname
+-rw------- 1 root root  16384 Nov 10 20:16 passwd.byname
+-rw------- 1 root root  16384 Nov 10 20:16 passwd.byuid
+-rw------- 1 root root  16384 Nov 10 20:16 protocols.byname
+-rw------- 1 root root  16384 Nov 10 20:16 protocols.bynumber
+-rw------- 1 root root  16384 Nov 10 20:16 rpc.byname
+-rw------- 1 root root  16384 Nov 10 20:16 rpc.bynumber
+-rw------- 1 root root  45056 Nov 10 20:16 services.byname
+-rw------- 1 root root 102400 Nov 10 20:16 services.byservicename
+-rw------- 1 root root  16384 Nov 10 20:16 shadow.byname
+ubuntu@nutresa-server:~$ sudo ypmatch nisprueba passwd.byname
+Can't match key nisprueba in map passwd.byname. Reason: Internal NIS error
+ubuntu@nutresa-server:~$ sudo /usr/lib/yp/ypinit -m
+
+At this point, we have to construct a list of the hosts which will run NIS
+servers.  nutresa-server is in the list of NIS server hosts.  Please continue to add
+the names for the other hosts, one per line.  When you are done with the
+list, type a <control D>.
+        next host to add:  nutresa-server
+        next host to add:
+The current list of NIS servers looks like this:
+
+nutresa-server
+
+Is this correct?  [y/n: y]  y
+We need a few minutes to build the databases...
+Building /var/yp/nutresa.local/ypservers...
+Running /var/yp/Makefile...
+gmake[1]: Entering directory '/var/yp/nutresa.local'
+Updating passwd.byname...
+Updating passwd.byuid...
+Updating group.byname...
+Updating group.bygid...
+Updating hosts.byname...
+Updating hosts.byaddr...
+Updating rpc.byname...
+Updating rpc.bynumber...
+Updating services.byname...
+Updating services.byservicename...
+Updating netid.byname...
+Updating protocols.bynumber...
+Updating protocols.byname...
+Updating netgroup...
+Updating netgroup.byhost...
+Updating netgroup.byuser...
+Updating shadow.byname...
+gmake[1]: Leaving directory '/var/yp/nutresa.local'
+
+nutresa-server has been set up as a NIS master server.
+
+Now you can run ypinit -s nutresa-server on all slave server.
+ubuntu@nutresa-server:~$ getent passwd nisprueba
+nisprueba:x:2101:2000::/home/nisprueba:/bin/bash
+ubuntu@nutresa-server:~$ sudo ypmatch nisprueba passwd.byname
+Can't match key nisprueba in map passwd.byname. Reason: Internal NIS error
+ubuntu@nutresa-server:~$ sudo makedbm -u /var/yp/nutresa.local/passwd.byname | grep nisprueba
+sudo: makedbm: command not found
+ubuntu@nutresa-server:~$ sudo /usr/lib/yp/makedbm -u /var/yp/nutresa.local/passwd.byname | grep nisprueba
+nisprueba       nisprueba:x:2101:2000::/home/nisprueba:/bin/bash
+ubuntu@nutresa-server:~$ sudo systemctl restart rpcbind
+ubuntu@nutresa-server:~$ sudo systemctl restart ypserv yppasswdd
+ubuntu@nutresa-server:~$ sudo systemctl restart ypbind
+Job for ypbind.service failed because the control process exited with error code.
+See "systemctl status ypbind.service" and "journalctl -xeu ypbind.service" for details.
+ubuntu@nutresa-server:~$ journalctl -xeu ypbind.service -n 30 --no-pager
+Nov 10 20:24:33 nutresa-server systemd[1]: Starting ypbind.service - NIS Binding Service...
+░░ Subject: A start job for unit ypbind.service has begun execution
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ A start job for unit ypbind.service has begun execution.
+░░
+░░ The job identifier is 10192.
+Nov 10 20:24:33 nutresa-server ypbind[10048]: No NIS server and no -broadcast option specified.
+Nov 10 20:24:33 nutresa-server ypbind[10048]: Add a NIS server to the /etc/yp.conf configuration file,
+Nov 10 20:24:33 nutresa-server ypbind[10048]: or start ypbind with the -broadcast option.
+Nov 10 20:24:33 nutresa-server systemd[1]: ypbind.service: Control process exited, code=exited, status=1/FAILURE
+░░ Subject: Unit process exited
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ An ExecStart= process belonging to unit ypbind.service has exited.
+░░
+░░ The process' exit code is 'exited' and its exit status is 1.
+Nov 10 20:24:33 nutresa-server systemd[1]: ypbind.service: Failed with result 'exit-code'.
+░░ Subject: Unit failed
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ The unit ypbind.service has entered the 'failed' state with result 'exit-code'.
+Nov 10 20:24:33 nutresa-server systemd[1]: Failed to start ypbind.service - NIS Binding Service.
+░░ Subject: A start job for unit ypbind.service has failed
+░░ Defined-By: systemd
+░░ Support: http://www.ubuntu.com/support
+░░
+░░ A start job for unit ypbind.service has finished with a failure.
+░░
+░░ The job identifier is 10192 and the job result is failed.
+ubuntu@nutresa-server:~$ grep -v '^#' /etc/yp.conf
+
+ubuntu@nutresa-server:~$ echo "domain nutresa.local server 127.0.0.1" | sudo tee -a /etc/yp.conf
+domain nutresa.local server 127.0.0.1
+ubuntu@nutresa-server:~$ domainname
+nutresa.local
+ubuntu@nutresa-server:~$ sudo systemctl restart ypbind
+systemctl is-active ypbind
+ypwhich
+sudo ypmatch nisprueba passwd.byname
+ypcat passwd
+active
+127.0.0.1
+nisprueba:x:2101:2000::/home/nisprueba:/bin/bash
+ubuntu:x:1000:1000:Ubuntu:/home/ubuntu:/bin/bash
+nisprueba:x:2101:2000::/home/nisprueba:/bin/bash
+nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin
+ubuntu@nutresa-server:~$ sudo make -C /var/yp
+make: Entering directory '/var/yp'
+gmake[1]: Entering directory '/var/yp/nutresa.local'
+gmake[1]: Nothing to be done for 'all'.
+gmake[1]: Leaving directory '/var/yp/nutresa.local'
+make: Leaving directory '/var/yp'
+ubuntu@nutresa-server:~$ ls -l /var/yp/nutresa.local/
+total 400
+-rw------- 1 root root  16384 Nov 10 20:20 group.bygid
+-rw------- 1 root root  16384 Nov 10 20:20 group.byname
+-rw------- 1 root root  16384 Nov 10 20:20 hosts.byaddr
+-rw------- 1 root root  16384 Nov 10 20:20 hosts.byname
+-rw------- 1 root root  16384 Nov 10 20:20 netgroup
+-rw------- 1 root root  16384 Nov 10 20:20 netgroup.byhost
+-rw------- 1 root root  16384 Nov 10 20:20 netgroup.byuser
+-rw------- 1 root root  16384 Nov 10 20:20 netid.byname
+-rw------- 1 root root  16384 Nov 10 20:20 passwd.byname
+-rw------- 1 root root  16384 Nov 10 20:20 passwd.byuid
+-rw------- 1 root root  16384 Nov 10 20:20 protocols.byname
+-rw------- 1 root root  16384 Nov 10 20:20 protocols.bynumber
+-rw------- 1 root root  16384 Nov 10 20:20 rpc.byname
+-rw------- 1 root root  16384 Nov 10 20:20 rpc.bynumber
+-rw------- 1 root root  45056 Nov 10 20:20 services.byname
+-rw------- 1 root root 102400 Nov 10 20:20 services.byservicename
+-rw------- 1 root root  16384 Nov 10 20:20 shadow.byname
+-rw------- 1 root root  16384 Nov 10 20:20 ypservers
+ubuntu@nutresa-server:~$ sudo ypmatch nisprueba passwd.byname
+nisprueba:x:2101:2000::/home/nisprueba:/bin/bash
+ubuntu@nutresa-server:~$ sudo systemctl enable rpcbind
+sudo systemctl restart rpcbind
+sudo systemctl restart ypserv
+Synchronizing state of rpcbind.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable rpcbind
+ubuntu@nutresa-server:~$ sudo systemctl status ypserv
+● ypserv.service - NIS/YP (Network Information Service) Server
+     Loaded: loaded (/usr/lib/systemd/system/ypserv.service; enabled; preset: enabled)
+     Active: active (running) since Tue 2026-11-10 20:34:21 -05; 14s ago
+    Process: 10284 ExecStartPre=/bin/domainname -F /etc/defaultdomain (code=exited, status=0/SUCCESS)
+    Process: 10289 ExecStart=/usr/sbin/ypserv $YPSERVARGS (code=exited, status=0/SUCCESS)
+   Main PID: 10291 (ypserv)
+      Tasks: 1 (limit: 4614)
+     Memory: 644.0K (peak: 1.5M)
+        CPU: 12ms
+     CGroup: /system.slice/ypserv.service
+             └─10291 /usr/sbin/ypserv -p 1011
+
+Nov 10 20:34:21 nutresa-server systemd[1]: Starting ypserv.service - NIS/YP (Network Information Service) Server...
+Nov 10 20:34:21 nutresa-server systemd[1]: ypserv.service: Can't open PID file /run/ypserv.pid (yet?) after start: No such file or directory
+Nov 10 20:34:21 nutresa-server systemd[1]: Started ypserv.service - NIS/YP (Network Information Service) Server.
+ubuntu@nutresa-server:~$ sudo systemctl status rpcbind
+● rpcbind.service - RPC bind portmap service
+     Loaded: loaded (/usr/lib/systemd/system/rpcbind.service; enabled; preset: enabled)
+     Active: active (running) since Tue 2026-11-10 20:34:21 -05; 33s ago
+TriggeredBy: ● rpcbind.socket
+       Docs: man:rpcbind(8)
+   Main PID: 10271 (rpcbind)
+      Tasks: 1 (limit: 4614)
+     Memory: 616.0K (peak: 876.0K)
+        CPU: 7ms
+     CGroup: /system.slice/rpcbind.service
+             └─10271 /sbin/rpcbind -f -w
+
+Nov 10 20:34:21 nutresa-server systemd[1]: Starting rpcbind.service - RPC bind portmap service...
+Nov 10 20:34:21 nutresa-server systemd[1]: Started rpcbind.service - RPC bind portmap service.
+ubuntu@nutresa-server:~$ sudo systemctl enable --now yppasswdd
+Synchronizing state of yppasswdd.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable yppasswdd
+ubuntu@nutresa-server:~$ sudo ufw allow from 192.168.1.0/24 to any port 111 proto tcp
+sudo ufw allow from 192.168.1.0/24 to any port 111 proto udp
+sudo ufw allow from 192.168.1.0/24 to any port 1011 proto tcp
+sudo ufw allow from 192.168.1.0/24 to any port 1011 proto udp
+sudo ufw allow from 192.168.1.0/24 to any port 1012 proto tcp
+sudo ufw allow from 192.168.1.0/24 to any port 1012 proto udp
+Rules updated
+Rules updated
+Rules updated
+Rules updated
+Rules updated
+Rules updated
+ubuntu@nutresa-server:~$ sudo ufw status
+Status: inactive
+ubuntu@nutresa-server:~$ sudo apt update
+Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Hit:4 http://security.ubuntu.com/ubuntu noble-security InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+3 packages can be upgraded. Run 'apt list --upgradable' to see them.
+ubuntu@nutresa-server:~$ sudo apt install -y samba smbclient
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+samba is already the newest version (2:4.19.5+dfsg-4ubuntu9.8).
+Suggested packages:
+  cifs-utils heimdal-clients
+The following NEW packages will be installed:
+  libsmbclient0 smbclient
+0 upgraded, 2 newly installed, 0 to remove and 3 not upgraded.
+Need to get 533 kB of archives.
+After this operation, 2376 kB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libsmbclient0 amd64 2:4.19.5+dfsg-4ubuntu9.8 [62.4 kB]
+Get:2 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 smbclient amd64 2:4.19.5+dfsg-4ubuntu9.8 [470 kB]
+Fetched 533 kB in 2s (236 kB/s)
+Selecting previously unselected package libsmbclient0:amd64.
+(Reading database ... 113486 files and directories currently installed.)
+Preparing to unpack .../libsmbclient0_2%3a4.19.5+dfsg-4ubuntu9.8_amd64.deb ...
+Unpacking libsmbclient0:amd64 (2:4.19.5+dfsg-4ubuntu9.8) ...
+Selecting previously unselected package smbclient.
+Preparing to unpack .../smbclient_2%3a4.19.5+dfsg-4ubuntu9.8_amd64.deb ...
+Unpacking smbclient (2:4.19.5+dfsg-4ubuntu9.8) ...
+Setting up libsmbclient0:amd64 (2:4.19.5+dfsg-4ubuntu9.8) ...
+Setting up smbclient (2:4.19.5+dfsg-4ubuntu9.8) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Processing triggers for libc-bin (2.39-0ubuntu8.9) ...
+Scanning processes...
+Scanning linux images...
+
+Running kernel seems to be up-to-date.
+
+No services need to be restarted.
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+ubuntu@nutresa-server:~$ smbd --version
+Version 4.19.5-Ubuntu
+ubuntu@nutresa-server:~$ sudo systemctl enable --now smbd
+Synchronizing state of smbd.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable smbd
+ubuntu@nutresa-server:~$ sudo systemctl status smbd
+● smbd.service - Samba SMB Daemon
+     Loaded: loaded (/usr/lib/systemd/system/smbd.service; enabled; preset: enabled)
+     Active: active (running) since Tue 2026-11-10 16:32:56 -05; 4h 36min ago
+       Docs: man:smbd(8)
+             man:samba(7)
+             man:smb.conf(5)
+   Main PID: 6751 (smbd)
+     Status: "smbd: ready to serve connections..."
+      Tasks: 3 (limit: 4614)
+     Memory: 10.2M (peak: 10.9M)
+        CPU: 221ms
+     CGroup: /system.slice/smbd.service
+             ├─6751 /usr/sbin/smbd --foreground --no-process-group
+             ├─6755 "smbd: notifyd" .
+             └─6756 "smbd: cleanupd "
+
+Nov 10 16:32:56 nutresa-server systemd[1]: Starting smbd.service - Samba SMB Daemon...
+Nov 10 16:32:56 nutresa-server (smbd)[6751]: smbd.service: Referenced but unset environment variable evaluates to an empty string: SMBDOPTIONS
+Nov 10 16:32:56 nutresa-server systemd[1]: Started smbd.service - Samba SMB Daemon.
+ubuntu@nutresa-server:~$ sudo groupadd sambausers
+ubuntu@nutresa-server:~$ sudo useradd -M -s /usr/sbin/nologin sambanutresa
+ubuntu@nutresa-server:~$ sudo usermod -aG sambausers sambanutresa
+ubuntu@nutresa-server:~$ sudo smbpasswd -a sambanutresa
+New SMB password:
+Retype new SMB password:
+Added user sambanutresa.
+ubuntu@nutresa-server:~$ sudo smbpasswd -e sambanutresa
+Enabled user sambanutresa.
+ubuntu@nutresa-server:~$ sudo pdbedit -L
+sambanutresa:2102:
+ubuntu@nutresa-server:~$ sudo mkdir -p /srv/samba/corporativo
+ubuntu@nutresa-server:~$ sudo chown root:sambausers /srv/samba/corporativo
+sudo chmod 2770 /srv/samba/corporativo
+ubuntu@nutresa-server:~$ ls -ld /srv/samba/corporativo
+drwxrws--- 2 root sambausers 4096 Nov 10 21:17 /srv/samba/corporativo
+ubuntu@nutresa-server:~$ echo "Documentacion corporativa Grupo Nutresa" | sudo tee /srv/samba/corporativo/README.txt
+Documentacion corporativa Grupo Nutresa
+ubuntu@nutresa-server:~$ sudo nano /etc/samba/smb.conf
+ubuntu@nutresa-server:~$ sudo nano /etc/samba/smb.conf
+ubuntu@nutresa-server:~$ testparm
+Load smb config files from /etc/samba/smb.conf
+Loaded services file OK.
+Weak crypto is allowed by GnuTLS (e.g. NTLM as a compatibility fallback)
+
+Server role: ROLE_STANDALONE
+
+Press enter to see a dump of your service definitions
+
+# Global parameters
+[global]
+        log file = /var/log/samba/log.%m
+        logging = file
+        map to guest = Bad User
+        max log size = 1000
+        obey pam restrictions = Yes
+        pam password change = Yes
+        panic action = /usr/share/samba/panic-action %d
+        passwd chat = *Enter\snew\s*\spassword:* %n\n *Retype\snew\s*\spassword:* %n\n *password\supdated\ssuccessfully* .
+        passwd program = /usr/bin/passwd %u
+        server role = standalone server
+        server string = %h server (Samba, Ubuntu)
+        unix password sync = Yes
+        usershare allow guests = Yes
+        idmap config * : backend = tdb
+
+
+[printers]
+        browseable = No
+        comment = All Printers
+        create mask = 0700
+        path = /var/tmp
+        printable = Yes
+
+
+[print$]
+        comment = Printer Drivers
+        path = /var/lib/samba/printers
+
+
+[Corporativo]
+        create mask = 0660
+        directory mask = 02770
+        force group = sambausers
+        path = /srv/samba/corporativo
+        read only = No
+        valid users = @sambausers
+ubuntu@nutresa-server:~$ sudo systemctl restart smbd
+ubuntu@nutresa-server:~$ sudo ufw allow from 192.168.1.0/24 to any port 445 proto tcp
+sudo ufw allow from 192.168.1.0/24 to any port 139 proto tcp
+sudo ufw allow from 192.168.1.0/24 to any port 137 proto udp
+sudo ufw allow from 192.168.1.0/24 to any port 138 proto udp
+Rules updated
+Rules updated
+Rules updated
+Rules updated
+ubuntu@nutresa-server:~$ testparm -s
+sudo pdbedit -L
+Load smb config files from /etc/samba/smb.conf
+Loaded services file OK.
+Weak crypto is allowed by GnuTLS (e.g. NTLM as a compatibility fallback)
+
+Server role: ROLE_STANDALONE
+
+# Global parameters
+[global]
+        log file = /var/log/samba/log.%m
+        logging = file
+        map to guest = Bad User
+        max log size = 1000
+        obey pam restrictions = Yes
+        pam password change = Yes
+        panic action = /usr/share/samba/panic-action %d
+        passwd chat = *Enter\snew\s*\spassword:* %n\n *Retype\snew\s*\spassword:* %n\n *password\supdated\ssuccessfully* .
+        passwd program = /usr/bin/passwd %u
+        server role = standalone server
+        server string = %h server (Samba, Ubuntu)
+        unix password sync = Yes
+        usershare allow guests = Yes
+        idmap config * : backend = tdb
+
+
+[printers]
+        browseable = No
+        comment = All Printers
+        create mask = 0700
+        path = /var/tmp
+        printable = Yes
+
+
+[print$]
+        comment = Printer Drivers
+        path = /var/lib/samba/printers
+
+
+[Corporativo]
+        create mask = 0660
+        directory mask = 02770
+        force group = sambausers
+        path = /srv/samba/corporativo
+        read only = No
+        valid users = @sambausers
+sambanutresa:2102:
+ubuntu@nutresa-server:~$ id sambanutresa
+getent group sambausers
+ls -ld /srv/samba/corporativo
+uid=2102(sambanutresa) gid=2102(sambanutresa) groups=2001(sambausers),2102(sambanutresa)
+sambausers:x:2001:sambanutresa
+drwxrws--- 2 root sambausers 4096 Nov 10 21:18 /srv/samba/corporativo
+ubuntu@nutresa-server:~$ sudo systemctl restart smbd nmbd
+sudo apt install -y smbclient
+smbclient //127.0.0.1/Corporativo -U sambanutresa -c 'ls'
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+smbclient is already the newest version (2:4.19.5+dfsg-4ubuntu9.8).
+0 upgraded, 0 newly installed, 0 to remove and 3 not upgraded.
+Password for [WORKGROUP\sambanutresa]:
+  .                                   D        0  Tue Nov 10 21:18:13 2026
+  ..                                  D        0  Tue Nov 10 21:18:13 2026
+  README.txt                          N       40  Tue Nov 10 21:18:13 2026
+
+                39535100 blocks of size 1024. 37054380 blocks available
+ubuntu@nutresa-server:~$ ls -l /srv/samba/corporativo/
+ls: cannot open directory '/srv/samba/corporativo/': Permission denied
+ubuntu@nutresa-server:~$ sudo ls -l /srv/samba/corporativo/
+total 8
+-rw-r--r-- 1 root         sambausers 40 Nov 10 21:18 README.txt
+-rw-rw---- 1 sambanutresa sambausers 43 Nov 10 21:51 prueba_windows.txt.txt
+ubuntu@nutresa-server:~$ cat /srv/samba/corporativo/prueba_windows.txt
+cat: /srv/samba/corporativo/prueba_windows.txt: Permission denied
+ubuntu@nutresa-server:~$ sudo cat /srv/samba/corporativo/prueba_windows.txt
+cat: /srv/samba/corporativo/prueba_windows.txt: No such file or directory
+ubuntu@nutresa-server:~$ sudo apt update
+sudo apt install -y cups printer-driver-cups-pdf
+Hit:1 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Get:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Get:5 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1444 kB]
+Get:6 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1711 kB]
+Fetched 3281 kB in 5s (710 kB/s)
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+3 packages can be upgraded. Run 'apt list --upgradable' to see them.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+cups is already the newest version (2.4.7-1.2ubuntu7.14).
+Suggested packages:
+  system-config-printer
+The following NEW packages will be installed:
+  printer-driver-cups-pdf
+0 upgraded, 1 newly installed, 0 to remove and 3 not upgraded.
+Need to get 25.7 kB of archives.
+After this operation, 241 kB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 printer-driver-cups-pdf amd64 3.0.1-14ubuntu0.24.04.1 [25.7 kB]
+Fetched 25.7 kB in 1s (28.7 kB/s)
+Selecting previously unselected package printer-driver-cups-pdf.
+(Reading database ... 113520 files and directories currently installed.)
+Preparing to unpack .../printer-driver-cups-pdf_3.0.1-14ubuntu0.24.04.1_amd64.deb ...
+Unpacking printer-driver-cups-pdf (3.0.1-14ubuntu0.24.04.1) ...
+Setting up printer-driver-cups-pdf (3.0.1-14ubuntu0.24.04.1) ...
+Processing triggers for cups (2.4.7-1.2ubuntu7.14) ...
+Updating PPD files for cups-pdf ...
+PPD for printer PDF updated
+Scanning processes...
+Scanning linux images...
+
+Running kernel seems to be up-to-date.
+
+No services need to be restarted.
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+ubuntu@nutresa-server:~$ sudo systemctl enable --now cups
+Synchronizing state of cups.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install enable cups
+ubuntu@nutresa-server:~$ sudo systemctl status cups
+● cups.service - CUPS Scheduler
+     Loaded: loaded (/usr/lib/systemd/system/cups.service; enabled; preset: enabled)
+     Active: active (running) since Tue 2026-11-10 21:59:13 -05; 31s ago
+TriggeredBy: ● cups.socket
+             ● cups.path
+       Docs: man:cupsd(8)
+   Main PID: 12262 (cupsd)
+     Status: "Scheduler is running..."
+      Tasks: 2 (limit: 4614)
+     Memory: 4.4M (peak: 10.3M)
+        CPU: 157ms
+     CGroup: /system.slice/cups.service
+             ├─12262 /usr/sbin/cupsd -l
+             └─12293 /usr/lib/cups/notifier/dbus dbus://
+
+Nov 10 21:59:13 nutresa-server systemd[1]: Starting cups.service - CUPS Scheduler...
+Nov 10 21:59:13 nutresa-server systemd[1]: Started cups.service - CUPS Scheduler.
+ubuntu@nutresa-server:~$ sudo nano /etc/cups/cupsd.conf
+ubuntu@nutresa-server:~$
+ubuntu@nutresa-server:~$ sudo nano /etc/cups/cupsd.conf
+ubuntu@nutresa-server:~$ sudo cupsd -t
+Printer drivers are deprecated and will stop working in a future version of CUPS. See https://github.com/OpenPrinting/cups/issues/103
+"/etc/cups/cups-files.conf" is OK.
+"/etc/cups/cupsd.conf" is OK.
+ubuntu@nutresa-server:~$ sudo nano /etc/cups/cupsd.conf
+ubuntu@nutresa-server:~$ sudo systemctl restart cups
+ubuntu@nutresa-server:~$ lpinfo -v | grep -i pdf
+lpinfo: Forbidden
+ubuntu@nutresa-server:~$ lpinfo -m | grep -i pdf
+lsb/usr/cupsfilters/Fuji_Xerox-DocuPrint_CM305_df-PDF.ppd Fuji Xerox DocuPrint CM305 df PDF
+lsb/usr/cups-pdf/CUPS-PDF_noopt.ppd Generic CUPS-PDF Printer (no options)
+lsb/usr/cups-pdf/CUPS-PDF_opt.ppd Generic CUPS-PDF Printer (w/ options)
+lsb/usr/cupsfilters/Generic-PDF_Printer-PDF.ppd Generic PDF Printer
+lsb/usr/cupsfilters/HP-Color_LaserJet_CM3530_MFP-PDF.ppd HP Color LaserJet CM3530 MFP PDF
+lsb/usr/cupsfilters/Ricoh-PDF_Printer-PDF.ppd Ricoh PDF Printer
+ubuntu@nutresa-server:~$ sudo lpinfo -v | grep -i pdf
+file cups-pdf:/
+ubuntu@nutresa-server:~$ sudo lpadmin -p Nutresa-PDF -E -v cups-pdf:/ -m drv:///sample.drv/generic.ppd
+lpadmin: Printer drivers are deprecated and will stop working in a future version of CUPS.
+ubuntu@nutresa-server:~$ lpstat -p -d
+printer Nutresa-PDF is idle.  enabled since Tue Nov 10 22:22:38 2026
+printer PDF is idle.  enabled since Tue Nov 10 21:59:13 2026
+system default destination: PDF
+ubuntu@nutresa-server:~$ sudo ufw allow from 192.168.1.0/24 to any port 631 proto tcp
+Rules updated
+ubuntu@nutresa-server:~$ echo "Prueba de impresion centralizada - Grupo Nutresa" > ~/prueba_impresion.txt
+ubuntu@nutresa-server:~$ lp -d Nutresa-PDF ~/prueba_impresion.txt
+request id is Nutresa-PDF-1 (1 file(s))
+ubuntu@nutresa-server:~$ lpstat -o
+ubuntu@nutresa-server:~$ lpstat -p Nutresa-PDF
+printer Nutresa-PDF is idle.  enabled since Tue Nov 10 22:26:25 2026
+ubuntu@nutresa-server:~$ sudo find /var/spool/cups-pdf -type f -mmin -5
+ubuntu@nutresa-server:~$ lpstat -W completed
+sudo tail -n 30 /var/log/cups/error_log
+sudo tail -n 30 /var/log/cups/page_log
+Nutresa-PDF-1           ubuntu            1024   Tue Nov 10 22:26:25 2026
+W [10/Nov/2026:21:59:14 -0500] CreateProfile failed: org.freedesktop.ColorManager.AlreadyExists:profile id \'PDF-Gray..\' already exists
+W [10/Nov/2026:21:59:14 -0500] CreateProfile failed: org.freedesktop.ColorManager.AlreadyExists:profile id \'PDF-RGB..\' already exists
+W [10/Nov/2026:22:13:32 -0500] Printer drivers are deprecated and will stop working in a future version of CUPS. See https://github.com/OpenPrinting/cups/issues/103
+E [10/Nov/2026:22:17:28 -0500] [Client 10] Returning HTTP Forbidden for CUPS-Get-Devices (no URI) from localhost
+E [10/Nov/2026:22:20:30 -0500] [CGI] cups-brf must be called as root
+E [10/Nov/2026:22:20:30 -0500] [cups-deviced] PID 12804 (cups-brf) stopped with status 1!
+tail: cannot open '/var/log/cups/page_log' for reading: No such file or directory
+ubuntu@nutresa-server:~$ ls -l ~/PDF/
+total 12
+-rw------- 1 ubuntu ubuntu 8474 Nov 10 22:26 prueba_impresion.pdf
+ubuntu@nutresa-server:~$ free -h
+               total        used        free      shared  buff/cache   available
+Mem:           3.8Gi       531Mi       2.6Gi       7.3Mi       1.0Gi       3.3Gi
+Swap:             0B          0B          0B
+ubuntu@nutresa-server:~$ df -h /
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda1        38G  2.4G   36G   7% /
+ubuntu@nutresa-server:~$ nproc
+2
+ubuntu@nutresa-server:~$ sudo ss -lntp | grep -E ':80 |:443 |:3000 '
+ubuntu@nutresa-server:~$ sudo apt update
+sudo apt install -y curl
+Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+3 packages can be upgraded. Run 'apt list --upgradable' to see them.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+curl is already the newest version (8.5.0-2ubuntu10.16).
+0 upgraded, 0 newly installed, 0 to remove and 3 not upgraded.
+ubuntu@nutresa-server:~$ curl -sSL https://dokploy.com/install.sh | sudo ADVERTISE_ADDR=192.168.1.34 sh
+Detecting latest stable version from GitHub...
+Latest stable version detected: v0.31.0
+Installing Dokploy version: v0.31.0
+# Executing docker install script, commit: 8ad27bd3ac871feabe62f1d926c4067800c1732f
++ sh -c apt-get -qq update >/dev/null
++ sh -c DEBIAN_FRONTEND=noninteractive apt-get -y -qq install ca-certificates curl >/dev/null
++ sh -c install -m 0755 -d /etc/apt/keyrings
++ sh -c curl -fsSL "https://download.docker.com/linux/ubuntu/gpg" -o /etc/apt/keyrings/docker.asc
++ sh -c chmod a+r /etc/apt/keyrings/docker.asc
++ sh -c echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu noble stable" > /etc/apt/sources.list.d/docker.list
++ sh -c apt-get -qq update >/dev/null
+INFO: Searching repository for VERSION '28.5.0'
+INFO: apt-cache madison docker-ce | grep '28.5.0' | head -1 | awk '{$1=$1};1' | cut -d' ' -f 3
+INFO: apt-cache madison docker-ce-cli | grep '28.5.0' | head -1 | awk '{$1=$1};1' | cut -d' ' -f 3
++ apt_flags=-y -qq
++ [ -n =5:28.5.0-1~ubuntu.24.04~noble ]
++ apt_flags=-y -qq --allow-downgrades
++ sh -c DEBIAN_FRONTEND=noninteractive apt-get -y -qq --allow-downgrades install docker-ce=5:28.5.0-1~ubuntu.24.04~noble docker-ce-cli=5:28.5.0-1~ubuntu.24.04~noble containerd.io docker-compose-plugin docker-ce-rootless-extras=5:28.5.0-1~ubuntu.24.04~noble docker-buildx-plugin docker-model-plugin >/dev/null
+Scanning processes...
+Scanning linux images...
+Using systemd to manage Docker service
++ sh -c systemctl enable --now docker.service 2>/dev/null
+INFO: Docker daemon enabled and started
+
++ sh -c docker version
+Client: Docker Engine - Community
+ Version:           28.5.0
+ API version:       1.51
+ Go version:        go1.24.7
+ Git commit:        887030f
+ Built:             Thu Oct  2 14:54:28 2025
+ OS/Arch:           linux/amd64
+ Context:           default
+
+Server: Docker Engine - Community
+ Engine:
+  Version:          28.5.0
+  API version:      1.51 (minimum version 1.24)
+  Go version:       go1.24.7
+  Git commit:       cd04830
+  Built:            Thu Oct  2 14:54:28 2025
+  OS/Arch:          linux/amd64
+  Experimental:     false
+ containerd:
+  Version:          v2.4.2
+  GitCommit:        b7a25261e029d68978bbf290df0a62fc819b3c51
+ runc:
+  Version:          1.5.2
+  GitCommit:        v1.5.2-0-g29dd3dc2
+ docker-init:
+  Version:          0.19.0
+  GitCommit:        de40ad0
+
+================================================================================
+
+To run Docker as a non-privileged user, consider setting up the
+Docker daemon in rootless mode for your user:
+
+    dockerd-rootless-setuptool.sh install
+
+Visit https://docs.docker.com/go/rootless/ to learn about rootless mode.
+
+
+To run the Docker daemon as a fully privileged service, but granting non-root
+users access, refer to https://docs.docker.com/go/daemon-access/
+
+WARNING: Access to the remote API on a privileged Docker daemon is equivalent
+         to root access on the host. Refer to the 'Docker daemon attack surface'
+         documentation for details: https://docs.docker.com/go/attack-surface/
+
+================================================================================
+
+Installed Docker version 28.5.0, build 887030f
+docker-ce set on hold.
+docker-ce-cli set on hold.
+docker-ce-rootless-extras set on hold.
+Using advertise address: 192.168.1.34
+Swarm initialized: current node (krnhe5ffardsjbn3gczhq85bv) is now a manager.
+
+To add a worker to this swarm, run the following command:
+
+    docker swarm join --token SWMTKN-1-0seruxz0b6lygc05c71tvxpqt9k5mgi5od8eo73j4cb1nrladn-b4t8ccnypl7ve6qv0joowh6gf 192.168.1.34:2377
+
+To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
+Swarm initialized
+0f55qu27u8prqjjpa5evds6ax
+Network created
+qmqm6o3d8h1e77fda8ee5dhr6
+wd57zxgqrpxmvkodnswabru29
+Generated secure database credentials and auth secret (stored in Docker Secrets)
+mtl1u3b51bssr7qmf27bnrvvo
+overall progress: 1 out of 1 tasks
+1/1: running   [==================================================>]
+verify: Service mtl1u3b51bssr7qmf27bnrvvo converged
+u1mgys8lznk52os4m2nuzn9mj
+overall progress: 1 out of 1 tasks
+1/1: running   [==================================================>]
+verify: Service u1mgys8lznk52os4m2nuzn9mj converged
+Unable to find image 'traefik:v3.6.25' locally
+v3.6.25: Pulling from library/traefik
+55afa1ecc21d: Pull complete
+43865a9fef03: Pull complete
+58e302bf3a34: Pull complete
+de5cbc806753: Pull complete
+Digest: sha256:31267173a15b4944e797a76ffd9c419707c8d8b32fe5b610f80cd0cfa05f372d
+Status: Downloaded newer image for traefik:v3.6.25
+d19ae88104f34bb10824fb423a5cbf999e4cece6d592685e712ecf818fd9f9fd
+
+Congratulations, Dokploy is installed!
+Wait 15 seconds for the server to start
+Please go to http://192.168.1.34:3000
+If you are on the same local network, use http://172.31.38.240:3000
+
+ubuntu@nutresa-server:~$ sudo docker version
+Client: Docker Engine - Community
+ Version:           28.5.0
+ API version:       1.51
+ Go version:        go1.24.7
+ Git commit:        887030f
+ Built:             Thu Oct  2 14:54:28 2025
+ OS/Arch:           linux/amd64
+ Context:           default
+
+Server: Docker Engine - Community
+ Engine:
+  Version:          28.5.0
+  API version:      1.51 (minimum version 1.24)
+  Go version:       go1.24.7
+  Git commit:       cd04830
+  Built:            Thu Oct  2 14:54:28 2025
+  OS/Arch:          linux/amd64
+  Experimental:     false
+ containerd:
+  Version:          v2.4.2
+  GitCommit:        b7a25261e029d68978bbf290df0a62fc819b3c51
+ runc:
+  Version:          1.5.2
+  GitCommit:        v1.5.2-0-g29dd3dc2
+ docker-init:
+  Version:          0.19.0
+  GitCommit:        de40ad0
+ubuntu@nutresa-server:~$ sudo systemctl status docker
+● docker.service - Docker Application Container Engine
+     Loaded: loaded (/usr/lib/systemd/system/docker.service; enabled; preset: enabled)
+     Active: active (running) since Tue 2026-11-10 22:46:38 -05; 10min ago
+TriggeredBy: ● docker.socket
+       Docs: https://docs.docker.com
+   Main PID: 14386 (dockerd)
+      Tasks: 74
+     Memory: 1.7G (peak: 2.5G)
+        CPU: 2min 51.403s
+     CGroup: /system.slice/docker.service
+             ├─14386 /usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
+             ├─15492 /usr/bin/docker-proxy -proto tcp -host-ip 0.0.0.0 -host-port 3000 -container-ip 172.18.0.4 -container-port 3000 -use-listen-fd
+             ├─15498 /usr/bin/docker-proxy -proto tcp -host-ip :: -host-port 3000 -container-ip 172.18.0.4 -container-port 3000 -use-listen-fd
+             ├─15786 /usr/bin/docker-proxy -proto tcp -host-ip 0.0.0.0 -host-port 80 -container-ip 172.18.0.5 -container-port 80 -use-listen-fd
+             ├─15793 /usr/bin/docker-proxy -proto tcp -host-ip :: -host-port 80 -container-ip 172.18.0.5 -container-port 80 -use-listen-fd
+             ├─15800 /usr/bin/docker-proxy -proto tcp -host-ip 0.0.0.0 -host-port 443 -container-ip 172.18.0.5 -container-port 443 -use-listen-fd
+             ├─15805 /usr/bin/docker-proxy -proto tcp -host-ip :: -host-port 443 -container-ip 172.18.0.5 -container-port 443 -use-listen-fd
+             ├─15813 /usr/bin/docker-proxy -proto udp -host-ip 0.0.0.0 -host-port 443 -container-ip 172.18.0.5 -container-port 443 -use-listen-fd
+             └─15822 /usr/bin/docker-proxy -proto udp -host-ip :: -host-port 443 -container-ip 172.18.0.5 -container-port 443 -use-listen-fd
+
+Nov 10 22:46:48 nutresa-server dockerd[14386]: time="2026-11-10T22:46:48.843299566-05:00" level=error msg="error reading the kernel parameter net.ipv4.vs.conn_reuse_mode>
+Nov 10 22:46:48 nutresa-server dockerd[14386]: time="2026-11-10T22:46:48.843318482-05:00" level=error msg="error reading the kernel parameter net.ipv4.vs.expire_nodest_c>
+Nov 10 22:46:48 nutresa-server dockerd[14386]: time="2026-11-10T22:46:48.843337337-05:00" level=error msg="error reading the kernel parameter net.ipv4.vs.expire_quiescen>
+Nov 10 22:46:49 nutresa-server dockerd[14386]: time="2026-11-10T22:46:49.863834043-05:00" level=warning msg="reference for unknown type: " digest="sha256:f9a7b9ebf6f5620>
+Nov 10 22:47:20 nutresa-server dockerd[14386]: time="2026-11-10T22:47:20.071250168-05:00" level=warning msg="reference for unknown type: " digest="sha256:f836f0ab7b87f59>
+Nov 10 22:50:27 nutresa-server dockerd[14386]: time="2026-11-10T22:50:27.217758284-05:00" level=info msg="No non-localhost DNS nameservers are left in resolv.conf. Using>
+Nov 10 22:51:44 nutresa-server dockerd[14386]: time="2026-11-10T22:51:44.358051927-05:00" level=info msg="NetworkDB stats nutresa-server(14e685a88e52) - netID:md7x8o0wqg>
+Nov 10 22:51:44 nutresa-server dockerd[14386]: time="2026-11-10T22:51:44.358249047-05:00" level=info msg="NetworkDB stats nutresa-server(14e685a88e52) - netID:0f55qu27u8>
+Nov 10 22:56:44 nutresa-server dockerd[14386]: time="2026-11-10T22:56:44.358364177-05:00" level=info msg="NetworkDB stats nutresa-server(14e685a88e52) - netID:md7x8o0wqg>
+Nov 10 22:56:44 nutresa-server dockerd[14386]: time="2026-11-10T22:56:44.358442484-05:00" level=info msg="NetworkDB stats nutresa-server(14e685a88e52) - netID:0f55qu27u8>
+
+ubuntu@nutresa-server:~$ sudo docker service ls
+ID             NAME               MODE         REPLICAS   IMAGE                     PORTS
+u1mgys8lznk5   dokploy            replicated   1/1        dokploy/dokploy:v0.31.0
+mtl1u3b51bss   dokploy-postgres   replicated   1/1        postgres:16
+ubuntu@nutresa-server:~$ sudo docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}'
+NAMES                                          IMAGE                     STATUS                    PORTS
+dokploy-traefik                                traefik:v3.6.25           Up 12 minutes             0.0.0.0:80->80/tcp, [::]:80->80/tcp, 0.0.0.0:443->443/tcp, [::]:443->443/tcp, 0.0.0.0:443->443/udp, [::]:443->443/udp
+dokploy.1.d59raieuf9pay00vpwi4grjx1            dokploy/dokploy:v0.31.0   Up 13 minutes (healthy)   0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp
+dokploy-postgres.1.svek5gl3iijarmlj0r4clp48o   postgres:16               Up 15 minutes             5432/tcp
+ubuntu@nutresa-server:~$ curl -I http://localhost:3000
+HTTP/1.1 307 Temporary Redirect
+X-Frame-Options: DENY
+Content-Security-Policy: frame-ancestors 'none'; base-uri 'self'; object-src 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+X-Permitted-Cross-Domain-Policies: none
+Cross-Origin-Opener-Policy: same-origin
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Cache-Control: private, no-cache, no-store, max-age=0, must-revalidate
+Location: /register
+Date: Wed, 11 Nov 2026 04:04:12 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+ubuntu@nutresa-server:~$ sudo docker node ls
+ID                            HOSTNAME         STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
+krnhe5ffardsjbn3gczhq85bv *   nutresa-server   Ready     Active         Leader           28.5.0
+ubuntu@nutresa-server:~$ sudo ufw allow from 192.168.1.31 to any port 3000 proto tcp
+Rules updated
+ubuntu@nutresa-server:~$ sudo ufw allow from 192.168.1.15 to any port 3000 proto tcp
+Rules updated
+ubuntu@nutresa-server:~$ sudo ufw allow from 192.168.1.0/24 to any port 80 proto tcp
+sudo ufw allow from 192.168.1.0/24 to any port 443 proto tcp
+Rules updated
+Rules updated
+ubuntu@nutresa-server:~$ sudo docker ps
+CONTAINER ID   IMAGE                     COMMAND                  CREATED              STATUS                    PORTS                                                                                                                   NAMES
+b3c55090dfa2   postgres:18               "docker-entrypoint.s…"   About a minute ago   Up About a minute         5432/tcp                                                                                                                my-first-project-nutresadb-gmjews.1.e75zq0lxllq8qtrnkllfemfm7
+1fdc386fcf81   nginxdemos/hello:latest   "/docker-entrypoint.…"   4 minutes ago        Up 4 minutes              80/tcp                                                                                                                  hello-world-xypyhw-pjaw1w.1.hlwgem9gtom4i3385ow5awea2
+d19ae88104f3   traefik:v3.6.25           "/entrypoint.sh trae…"   27 minutes ago       Up 27 minutes             0.0.0.0:80->80/tcp, [::]:80->80/tcp, 0.0.0.0:443->443/tcp, [::]:443->443/tcp, 0.0.0.0:443->443/udp, [::]:443->443/udp   dokploy-traefik
+11a0fa09570b   dokploy/dokploy:v0.31.0   "/usr/bin/tini -- sh…"   27 minutes ago       Up 27 minutes (healthy)   0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp                                                                             dokploy.1.d59raieuf9pay00vpwi4grjx1
+105fe7a1fd58   postgres:16               "docker-entrypoint.s…"   30 minutes ago       Up 30 minutes             5432/tcp                                                                                                                dokploy-postgres.1.svek5gl3iijarmlj0r4clp48o
+ubuntu@nutresa-server:~$ sudo docker service ls
+ID             NAME                                MODE         REPLICAS   IMAGE                     PORTS
+u1mgys8lznk5   dokploy                             replicated   1/1        dokploy/dokploy:v0.31.0
+mtl1u3b51bss   dokploy-postgres                    replicated   1/1        postgres:16
+hvjyl8bdnffs   hello-world-xypyhw-pjaw1w           replicated   1/1        nginxdemos/hello
+iz2mouh5q8d3   my-first-project-nutresadb-gmjews   replicated   1/1        postgres:18
+ubuntu@nutresa-server:~$ SELECT version();
+bash: syntax error near unexpected token `('
+ubuntu@nutresa-server:~$ sudo docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}'
+NAMES                                                           IMAGE                     STATUS
+my-first-project-nutresadb-gmjews.1.e75zq0lxllq8qtrnkllfemfm7   postgres:18               Up 9 minutes
+hello-world-xypyhw-pjaw1w.1.hlwgem9gtom4i3385ow5awea2           nginxdemos/hello:latest   Up 12 minutes
+dokploy-traefik                                                 traefik:v3.6.25           Up 34 minutes
+dokploy.1.d59raieuf9pay00vpwi4grjx1                             dokploy/dokploy:v0.31.0   Up 35 minutes (healthy)
+dokploy-postgres.1.svek5gl3iijarmlj0r4clp48o                    postgres:16               Up 37 minutes
+ubuntu@nutresa-server:~$ sudo docker exec -it $(sudo docker ps -q -f name=nutresadb) psql -U nutresa-admin -d nutresa-db -c "SELECT version();"
+                                                      version
+--------------------------------------------------------------------------------------------------------------------
+ PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+(1 row)
+
+ubuntu@nutresa-server:~$ sudo docker exec -it $(sudo docker ps -q -f name=nutresadb) psql -U nutresa-admin -d nutresa-db
+psql (18.6 (Debian 18.6-1.pgdg13+2))
+Type "help" for help.
+
+nutresa-db=# CREATE TABLE prueba_nutresa (
+    id SERIAL PRIMARY KEY,
+    mensaje VARCHAR(200)
+);
+
+INSERT INTO prueba_nutresa (mensaje)
+VALUES ('Base de datos Nutresa funcionando');
+
+SELECT * FROM prueba_nutresa;
+CREATE TABLE
+INSERT 0 1
+ id |              mensaje
+----+-----------------------------------
+  1 | Base de datos Nutresa funcionando
+(1 row)
+
+nutresa-db=# \q
+ubuntu@nutresa-server:~$ sudo find /etc/dokploy/applications/my-first-project-nutresa-qmjfti/code -not -path '*/.git/*' -type f
+/etc/dokploy/applications/my-first-project-nutresa-qmjfti/code/README.md
+/etc/dokploy/applications/my-first-project-nutresa-qmjfti/code/codigo/.gitkeep
+/etc/dokploy/applications/my-first-project-nutresa-qmjfti/code/codigo/api/main.py
+/etc/dokploy/applications/my-first-project-nutresa-qmjfti/code/codigo/api/requirements.txt
+/etc/dokploy/applications/my-first-project-nutresa-qmjfti/code/codigo/api/DockerFile
+/etc/dokploy/applications/my-first-project-nutresa-qmjfti/code/codigo/web/.env
+/etc/dokploy/applications/my-first-project-nutresa-qmjfti/code/codigo/web/DockerFile
+/etc/dokploy/applications/my-first-project-nutresa-qmjfti/code/codigo/web/index.html
+/etc/dokploy/applications/my-first-project-nutresa-qmjfti/code/diagrama.mmd
+/etc/dokploy/applications/my-first-project-nutresa-qmjfti/code/documentacion.md
+/etc/dokploy/applications/my-first-project-nutresa-qmjfti/code/analisis.md
+/etc/dokploy/applications/my-first-project-nutresa-qmjfti/code/LICENSE
+/etc/dokploy/applications/my-first-project-nutresa-qmjfti/code/capturas/.gitkeep
+ubuntu@nutresa-server:~$ sudo docker service ls
+sudo docker ps -a --format 'table {{.Names}}\t{{.Status}}' | grep -i nutresaapi
+sudo docker service logs --tail 50 $(sudo docker service ls -q -f name=nutresaapi)
+ID             NAME                                 MODE         REPLICAS   IMAGE                                       PORTS
+u1mgys8lznk5   dokploy                              replicated   1/1        dokploy/dokploy:v0.31.0
+mtl1u3b51bss   dokploy-postgres                     replicated   1/1        postgres:16
+hvjyl8bdnffs   hello-world-xypyhw-pjaw1w            replicated   1/1        nginxdemos/hello
+x134srm8kgyo   my-first-project-nutresa-qmjfti      replicated   1/1        my-first-project-nutresa-qmjfti:latest
+c1u3m4xkf00u   my-first-project-nutresaapi-5ddxyx   replicated   0/1        my-first-project-nutresaapi-5ddxyx:latest
+iz2mouh5q8d3   my-first-project-nutresadb-gmjews    replicated   1/1        postgres:18
+my-first-project-nutresaapi-5ddxyx.1.uphfndltqvj6vmwtrosfwou81   Exited (0) 1 second ago
+my-first-project-nutresaapi-5ddxyx.1.93cfastebgnekupkfuhw0gq6q   Exited (0) 9 seconds ago
+my-first-project-nutresaapi-5ddxyx.1.tzvv3wvl0knqh279lv1mb7d8e   Exited (0) 16 seconds ago
+my-first-project-nutresaapi-5ddxyx.1.fzvcy2ljo6cgtk9os4ms05gb2   Exited (0) 24 seconds ago
+my-first-project-nutresaapi-5ddxyx.1.mhikvl3rqy4qmlccv0n4hl5th   Exited (0) 31 seconds ago
+docker: 'docker service logs' requires 1 argument
+
+Usage:  docker service logs [OPTIONS] SERVICE|TASK
+
+Run 'docker service logs --help' for more information
+ubuntu@nutresa-server:~$ sudo docker service logs --tail 50 my-first-project-nutresaapi-5ddxyx
+ubuntu@nutresa-server:~$ sudo cat /etc/dokploy/applications/my-first-project-nutresaapi-5ddxyx/code/codigo/api/DockerFile
+sudo cat /etc/dokploy/applications/my-first-project-nutresaapi-5ddxyx/code/codigo/api/main.py
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY main.py .
+
+EXPOSE 8000
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]import os
+import psycopg
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI(title="Nutresa API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+
+def get_db():
+    return psycopg.connect(DATABASE_URL)
+
+
+@app.get("/")
+def inicio():
+    return {
+        "empresa": "Grupo Nutresa",
+        "servicio": "Backend API",
+        "estado": "Funcionando"
+    }
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
+@app.get("/productos")
+def productos():
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS productos (
+                    id SERIAL PRIMARY KEY,
+                    nombre VARCHAR(100) NOT NULL
+                )
+            """)
+
+            cur.execute("""
+                SELECT id, nombre FROM productos
+            """)
+
+            resultados = cur.fetchall()
+
+    return [
+        {"id": fila[0], "nombre": fila[1]}
+        for fila in resultados
+    ]
+
+
+@app.post("/productos")
+def crear_producto(producto: dict):
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO productos (nombre) VALUES (%s) RETURNING id",
+                (producto["nombre"],)
+            )
+            nuevo_id = cur.fetchone()[0]
+
+    return {
+        "id": nuevo_id,
+        "nombre": producto["nombre"]
+    }ubuntu@nutresa-server:~$ sudo docker image inspect my-first-project-nutresaapi-5ddxyx:latest --format 'CMD={{json .Config.Cmd}} ENTRYPOINT={{json .Config.Entrypoint}}'                       sudo docker image inspect my-first-project-nutresaapi-5ddxyx:latest --format 'CMD={{json .Config.Cmd}} ENTRYPOINT={{json .Config.Entrypoint}}'
+CMD=["python main.py"] ENTRYPOINT=["/bin/bash","-l","-c"]
+ubuntu@nutresa-server:~$ sudo docker service inspect my-first-project-nutresaapi-5ddxyx --format 'Command={{json .Spec.TaskTemplate.ContainerSpec.Command}} Args={{json .Spec.TaskTemplate.ContainerSpec.Args}}'
+Command=null Args=null
+ubuntu@nutresa-server:~$ sudo docker image inspect my-first-project-nutresaapi-5ddxyx:latest --format 'CMD={{json .Config.Cmd}} ENTRYPOINT={{json .Config.Entrypoint}}'
+sudo docker service ls | grep nutresaapi
+CMD=["uvicorn","main:app","--host","0.0.0.0","--port","8000"] ENTRYPOINT=null
+c1u3m4xkf00u   my-first-project-nutresaapi-5ddxyx   replicated   1/1        my-first-project-nutresaapi-5ddxyx:latest
+ubuntu@nutresa-server:~$
