@@ -1,0 +1,3 @@
+# /etc/exports en nutresa-server (192.168.1.34)
+# NFSv4: raiz de exportacion (fsid=0), solo subred local, root_squash activo
+/srv/nfs/nutresa 192.168.1.0/24(rw,sync,no_subtree_check,root_squash,fsid=0)
