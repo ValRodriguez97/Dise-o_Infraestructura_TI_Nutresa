@@ -1,13 +1,17 @@
 graph LR
-A[Red Local] --> B[Dokploy/Traefik]
-B --> C[Web Server]
-B --> D[Backend API]
-B --> E[Panel Admin]
-F[Servidor Linux] --> G[NTP]
-F --> H[NFS]
-F --> I[NIS]
-F --> J[CUPS]
-F --> K[Samba]
-H --> L[Clientes NFS]
-K --> M[Clientes Windows/Mac]
-I --> N[Autenticación]
+    A["Red local 192.168.1.0/24"] --> B["Dokploy / Traefik<br/>192.168.1.34"]
+    B --> C["Web Nginx"]
+    B --> D["Backend API FastAPI"]
+    B --> E["Panel Admin :3000"]
+    D --> P[("PostgreSQL 18<br/>red interna Docker")]
+    DD["DuckDNS<br/>nutresa-admin.duckdns.org"] -.->|"DNS-01 / Let's Encrypt"| B
+    F["nutresa-server"] --> G["NTP Chrony :123"]
+    F --> H["NFSv4 :2049"]
+    F --> I["NIS :111 1011 1012"]
+    F --> J["CUPS :631"]
+    F --> K["Samba :445"]
+    H --> L["Cliente Linux 192.168.1.35"]
+    I --> L
+    G --> L
+    K --> M["Cliente Windows 192.168.1.31"]
+    J --> M

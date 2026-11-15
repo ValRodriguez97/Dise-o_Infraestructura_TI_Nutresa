@@ -27,134 +27,125 @@ Para este proyecto se simula la infraestructura TI de una sede corporativa de Nu
 ## **3. Justificación de los servicios propuestos**
 
 ### **3.1 Dokploy y Traefik**
-Dokploy permite administrar aplicaciones contenerizadas desde una interfaz centralizada. Se propone como plataforma PaaS para desplegar el sitio institucional, la API y la base de datos. Traefik actuará como reverse proxy, recibiendo el tráfico de la red local y enrutando las peticiones HTTP/HTTPS hacia los contenedores correspondientes, además de gestionar los certificados SSL/TLS.
+Dokploy permite administrar aplicaciones contenerizadas desde una interfaz centralizada. Se instaló en `nutresa-server` (Dokploy v0.31.0 sobre Docker 28.5 en modo Swarm, con Traefik v3.6.25) declarando la IP de servicio `192.168.1.34` durante la instalación. Dokploy se usa como plataforma PaaS para desplegar el sitio institucional, la API y la base de datos. Traefik actúa como reverse proxy: recibe el tráfico en los puertos 80 y 443, lo enruta hacia los contenedores correspondientes y gestiona los certificados SSL/TLS.
 
-**Justificación:** reduce la administración manual de servicios web, facilita despliegues reproducibles y centraliza el acceso seguro por HTTPS.
+**Justificación:** reduce la administración manual de servicios web, facilita despliegues reproducibles desde un repositorio Git y centraliza el acceso seguro por HTTPS.
 
 ### **3.2 Web Server (Nginx)**
-Se implementará un sitio institucional de Nutresa con información sobre sus unidades de negocio, marcas, productos y contacto corporativo.
+Se implementó un sitio institucional de Grupo Nutresa como página estática servida por Nginx dentro de un contenedor (`nginx:alpine`). Se despliega en Dokploy desde el repositorio Git del proyecto. El sitio presenta la compañía, sus unidades de negocio y un formulario de contacto, y se publica por HTTPS en `nutresa-admin.duckdns.org`.
 
-**Justificación:** Nutresa requiere una presencia web segura para clientes, proveedores, inversionistas y empleados. El sitio será accesible mediante HTTPS y se ejecutará como contenedor en Dokploy, evitando instalar un servidor web en el host y así no generar conflictos con los puertos 80 y 443 de Traefik.
+**Justificación:** Nutresa requiere una presencia web segura para clientes, proveedores, inversionistas y empleados. Al ejecutarse como contenedor en Dokploy, no se instala un servidor web en el host y se evitan conflictos con los puertos 80 y 443 de Traefik.
 
 ### **3.3 Backend API**
-La API REST atenderá las solicitudes del sitio institucional: consulta de noticias y productos, y recepción de formularios de contacto. Se desplegará como aplicación en Dokploy y se conectará a PostgreSQL por la red interna de Docker.
+Se desarrolló una API REST con FastAPI que se despliega como aplicación en Dokploy a partir del mismo repositorio. Expone tres rutas: `/` (información del servicio), `/health` (estado) y `/productos` (consulta y registro de productos, con GET y POST). Se conecta a PostgreSQL mediante la variable de entorno `DATABASE_URL`, a través de la red interna de Docker.
 
-**Justificación:** separa la presentación (sitio web) de la lógica y el acceso a datos, lo que evita exponer la base de datos y permite actualizar cada componente de forma independiente.
+
+**Justificación:** separa la presentación (sitio web) de la lógica y el acceso a datos, evita exponer la base de datos y permite actualizar cada componente de forma independiente.
 
 ### **3.4 Panel Admin (Dokploy)**
-El panel web de Dokploy será el punto de administración de aplicaciones, dominios, certificados y bases de datos. Se accederá mediante un subdominio con HTTPS a través de Traefik.
+El panel web de Dokploy es el punto de administración de aplicaciones, dominios, certificados y bases de datos. Se accede desde `http://192.168.1.34:3000`, y el acceso está permitido únicamente a las IPs de los administradores (`192.168.1.31` y `192.168.1.15`).
 
-**Justificación:** concentra la gestión de la plataforma en una sola interfaz y su acceso se restringe a los administradores de TI.
+**Justificación:** concentra la gestión de la plataforma en una sola interfaz y limita su acceso a los administradores de TI.
 
 ### **3.5 Dominio/DNS y SSL/TLS**
-El sitio y el panel se publicarán bajo un nombre de dominio (dominio gratuito o DNS dinámico), por ejemplo `nutresa-infra.duckdns.org`, con subdominios para cada servicio. Los certificados serán emitidos por Let's Encrypt a través de Traefik. Si la red no permite la validación HTTP-01 (por ejemplo, por CGNAT), se usará el desafío DNS-01 o, como alternativa, un certificado autofirmado.
+Se registró el dominio gratuito `nutresa-admin.duckdns.org` en DuckDNS, apuntando a la IP de servicio `192.168.1.34`.  Traefik se configuró para validar el certificado mediante el **desafío DNS-01**, usando el token de DuckDNS. Se verifica desde el host Windows que el sitio responde por HTTPS con código 200 y que el tráfico HTTP se redirige a HTTPS (código 308).
 
-**Justificación:** permite cifrar todo el tráfico web y evita acceder a los servicios por IP y puerto.
+
+**Justificación:** permite cifrar todo el tráfico web, acceder a los servicios por nombre y no por IP y puerto, y obtener un certificado válido sin exponer el servidor a internet.
 
 ### **3.6 NTP**
-El servicio NTP sincronizará la hora del servidor con una fuente confiable (`pool.ntp.org`) y ofrecerá esa hora a los clientes de la red local.
+El servicio NTP se implementó con **Chrony**, el servicio de sincronización estándar y mantenido en Ubuntu 24.04, que cumple la misma función que el paquete `ntp`  (cliente y servidor NTP) y se verifica con `chronyc`. El servidor toma la hora de las fuentes de Ubuntu (`ntp.ubuntu.com` y el pool de Ubuntu), queda en estrato 3 y ofrece la hora a la red `192.168.1.0/24` mediante la directiva `allow 192.168.1.0/24`. El cliente `nutresa-cliente` se configuró con `server 192.168.1.34 iburst` y quedó sincronizado con el servidor local (estrato 4).
 
-**Justificación:** la sincronización horaria es necesaria para registros de acceso, bitácoras, respaldos, autenticación y trazabilidad operativa. Evita inconsistencias entre equipos de la red. En la máquina virtual se desactivará la sincronización de hora del hipervisor para evitar conflictos con el servicio.
+**Justificación:** la sincronización horaria es necesaria para registros de acceso, bitácoras, respaldos, certificados SSL, autenticación y trazabilidad operativa. Al instalar Chrony, Ubuntu retira `systemd-timesyncd`, por lo que no hay dos servicios compitiendo por el reloj.
 
 ### **3.7 NFS**
-NFS compartirá un directorio corporativo con las estaciones de trabajo Linux (Clientes NFS) de la sede simulada de Nutresa. Se usará NFSv4 para concentrar el tráfico en un solo puerto.
+NFS comparte el directorio corporativo `/srv/nfs/nutresa` con los clientes Linux de la red. Se usa **NFSv4** con `fsid=0`, de modo que todo el tráfico viaja por el puerto 2049/TCP. La exportación está limitada a `192.168.1.0/24`, con `rw`, `sync`, `no_subtree_check` y `root_squash`. El directorio pertenece a `root:nutresa` con permisos `2770` (bit setgid), y el grupo `nutresa` tiene GID 2000 igual en servidor y cliente. El cliente monta el recurso en `/mnt/nutresa` (NFSv4.2 sobre TCP) y el montaje es permanente mediante `/etc/fstab`.
 
-**Justificación:** permite centralizar archivos técnicos, reportes, documentos de calidad y material operativo, facilitando el acceso compartido entre los equipos Linux. El acceso estará restringido a la subred local, se mantendrá `root_squash` y los permisos se asignarán por grupo para proteger la información.
+**Justificación:** permite centralizar archivos técnicos, reportes, documentos de calidad y material operativo. Como NFS identifica a los usuarios por UID/GID numéricos, mantener el mismo GID en todos los equipos asegura permisos consistentes; `root_squash` evita que el `root` remoto tenga privilegios en el servidor.
 
 ### **3.8 NIS**
-NIS permitirá centralizar las cuentas de usuario y facilitar la autenticación de los clientes Linux de la red local bajo el dominio `nutresa.local`.
+NIS centraliza las cuentas de usuario de los clientes Linux bajo el dominio `nutresa.local`. El servidor se inicializó con `ypinit -m`; los puertos de `ypserv` y `yppasswdd` se fijaron en 1011 y 1012 (en `/etc/default/nis`) para poder filtrarlos, y el acceso se limitó a `192.168.1.0/24` con `/etc/ypserv.securenets`. Se creó el usuario de prueba `nisprueba` (UID 2101, GID 2000) y el cliente se vinculó al servidor con `domain nutresa.local server 192.168.1.34` en `/etc/yp.conf`. La verificación en el cliente fue exitosa: `ypwhich` devuelve `192.168.1.34` y `getent passwd nisprueba` entrega la cuenta centralizada.
 
-**Justificación:** evita crear manualmente el mismo usuario en cada equipo Linux y facilita la administración de usuarios para áreas como operaciones, logística, calidad y TI. Los UID/GID centralizados también hacen que los permisos de NFS sean consistentes entre equipos.
+**Justificación:** evita crear manualmente el mismo usuario en cada equipo Linux. Además, los UID/GID centralizados hacen consistentes los permisos de NFS entre equipos (el usuario `nisprueba` pertenece al grupo `nutresa`, GID 2000).
 
 **Consideración de seguridad:** NIS es un protocolo antiguo que no cifra la información de las cuentas, por lo que su uso se limita a la red local, restringido por UFW y por la opción `securenets`. En un entorno productivo real se recomendaría migrar a LDAP o FreeIPA; aquí se usa por ser requisito del proyecto.
 
 ### **3.9 CUPS**
-CUPS administrará las impresoras compartidas y sus colas de impresión dentro de la sede simulada de Nutresa.
+CUPS administra las colas de impresión desde el servidor. Se habilitó la administración desde la red local (escucha en el puerto 631) y, al no contar con una impresora física, se creó la impresora virtual **`Nutresa-PDF`** con `cups-pdf`. Se probó el servicio enviando un trabajo con `lp -d Nutresa-PDF`, que generó el archivo PDF correspondiente, y se accedió al panel web desde el host Windows en `https://192.168.1.34:631`.
 
-**Justificación:** permite que los usuarios de diferentes áreas envíen trabajos de impresión a través de un servidor centralizado. Puede utilizarse para imprimir etiquetas internas, órdenes de producción, reportes de calidad, guías de despacho y documentos administrativos. Para las pruebas se usará una impresora virtual (`cups-pdf`) en caso de no contar con una impresora física.
+**Justificación:** permite que usuarios de diferentes áreas envíen trabajos de impresión a través de un servidor centralizado, por ejemplo etiquetas internas, órdenes de producción, reportes de calidad y guías de despacho.
 
 ### **3.10 Samba**
-Samba compartirá carpetas corporativas con clientes Windows y macOS.
+Samba comparte la carpeta corporativa con clientes Windows y macOS. El recurso se llama **`[Corporativo]`** y apunta a `/srv/samba/corporativo`. El acceso requiere autenticación: solo pueden entrar los miembros del grupo `sambausers` (`valid users = @sambausers`), con `force group = sambausers` y máscaras `0660` para archivos y `02770` para directorios. No se habilita el acceso de invitados. El usuario `sambanutresa` se creó sin shell de inicio de sesión (`/usr/sbin/nologin`) y con contraseña propia de Samba (`smbpasswd`). Se probó desde el host Windows: se autenticó, accedió a la carpeta y creó un archivo que luego se verificó en el servidor. El servicio usa el puerto 445/TCP.
 
-**Justificación:** permite interoperabilidad con los sistemas operativos de escritorio usados en oficinas, sin exponer directamente el sistema de archivos del servidor. Los usuarios se crean con `smbpasswd` y se agrupan en `sambausers`; no se habilita acceso de invitados.
+**Justificación:** permite interoperabilidad con los sistemas operativos de escritorio de las oficinas sin exponer el sistema de archivos completo del servidor.
 
 ### **3.11 PostgreSQL**
-PostgreSQL almacenará los datos de la aplicación web institucional, como noticias, productos, información de contacto y formularios.
+PostgreSQL se desplegó desde Dokploy como servicio independiente (imagen `postgres:18`) con la base de datos `nutresa-db` y el usuario `nutresa-admin`. Se comprobó su funcionamiento con `psql` dentro del contenedor (consulta de versión, creación de una tabla de prueba e inserción de un registro). El puerto 5432 no se publica: solo es accesible desde la red interna de Docker, donde la Backend API se conecta mediante `DATABASE_URL`. **
 
-**Justificación:** es un sistema gestor de bases de datos relacional que permite almacenar y consultar la información de la aplicación. Se desplegará mediante Dokploy y el backend se conectará a través de la red interna de Docker, sin publicar el puerto 5432 hacia la red local ni hacia internet.
+**Justificación:** es un gestor relacional que permite almacenar y consultar los datos de la aplicación (en la implementación, el catálogo de productos). Al no publicar el puerto, se reduce la superficie de ataque.
 
 ## **4. Diagrama de arquitectura**
 
 El diagrama completo se encuentra en el archivo `diagrama.mmd`.
 
-```mermaid
-graph LR
-    A[Red Local] --> B[Dokploy/Traefik]
-    B --> C[Web Server]
-    B --> D[Backend API]
-    B --> E[Panel Admin]
-    F[Servidor Linux] --> G[NTP]
-    F --> H[NFS]
-    F --> I[NIS]
-    F --> J[CUPS]
-    F --> K[Samba]
-    H --> L[Clientes NFS]
-    K --> M[Clientes Windows/Mac]
-    I --> N[Autenticación]
-```
-
-**Descripción:** el tráfico web de la red local llega a Dokploy/Traefik, que lo distribuye al Web Server, la Backend API y el Panel Admin. Por otro lado, el Servidor Linux ofrece NTP, NFS, NIS, CUPS y Samba: NFS atiende a los clientes Linux, Samba a los clientes Windows/Mac y NIS provee la autenticación centralizada. La base de datos PostgreSQL se despliega dentro de Dokploy y solo es accesible por la Backend API a través de la red interna de Docker.
+**Descripción:** el tráfico web de la red local llega a Dokploy/Traefik, que lo distribuye al Web Server, a la Backend API y al Panel Admin. DuckDNS resuelve el dominio hacia la IP del servidor y el certificado se obtiene mediante el desafío DNS-01. La base de datos PostgreSQL se despliega dentro de Dokploy y solo es accesible por la Backend API a través de la red interna de Docker. Por otro lado, `nutresa-server` ofrece directamente NTP, NFS, NIS, CUPS y Samba: NTP, NFS y NIS atienden al cliente Linux, y Samba y CUPS al cliente Windows.
 
 ## **5. Tabla de requisitos técnicos**
 
-Servidor: Ubuntu Server, IP fija `192.168.1.10/24` (reserva DHCP o configuración estática). Dominio: `nutresa-infra.duckdns.org`. Dominio NIS: `nutresa.local`.
+Servidor: Ubuntu Server 24.04.5 LTS (`nutresa-server`), IP de servicio `192.168.1.34/24` (interfaz `eth1`, fijada como dirección adicional en Netplan con DHCP activo). Cliente Linux: `192.168.1.35`. Host Windows (cliente y administrador): `192.168.1.31`. Dominio: `nutresa-admin.duckdns.org`. Dominio NIS: `nutresa.local`.
 
 | Servicio | IP del servidor | Puerto | Protocolo | Tipo de servicio | Cliente o consumidor | Alcance |
 |---|---|---|---|---|---|---|
-| Dokploy / Traefik | 192.168.1.10 | 80, 443 | HTTP, HTTPS/TCP | Proxy inverso y SSL | Navegadores y aplicaciones | Red local |
-| Panel Admin (Dokploy) | 192.168.1.10 | 443 (vía Traefik); 3000 solo durante la instalación | HTTPS/TCP | PaaS / Panel web | Administradores TI | Solo IPs de administradores |
-| Web Server (Nginx) | 192.168.1.10 | 443 (vía Traefik) | HTTPS/TCP | Servidor web | Usuarios internos y externos | Según publicación |
-| Backend API | 192.168.1.10 | 443 (vía Traefik, ruta `/api`) | HTTPS/TCP | API REST | Aplicación web | Red local |
+| Dokploy / Traefik | 192.168.1.34 | 80, 443 | HTTP, HTTPS/TCP | Proxy inverso y SSL | Navegadores y aplicaciones | Red local |
+| Panel Admin (Dokploy) | 192.168.1.34 | 3000 | HTTP/TCP | PaaS / Panel web | Administradores TI | Solo 192.168.1.31 y 192.168.1.15 |
+| Web Server (Nginx) | 192.168.1.34 | 443 (vía Traefik) | HTTPS/TCP | Servidor web | Usuarios de la red local | Red local |
+| Backend API | 192.168.1.34 | 443 (vía Traefik) **[CONFIRMAR ruta o subdominio]** | HTTPS/TCP | API REST | Aplicación web | Red local |
 | PostgreSQL | Red interna Docker | 5432 (no publicado) | TCP | Base de datos | Backend API | Solo red interna Docker |
-| DNS / dominio | Proveedor externo | 53 (salida) | UDP/TCP | Resolución de nombres | Todos los equipos | Externo |
-| Let's Encrypt (validación) | 192.168.1.10 | 80 (HTTP-01) o DNS-01 | TCP | Emisión de certificados | Traefik | Entrante solo en la validación |
-| NTP | 192.168.1.10 | 123 | UDP | Sincronización horaria | Servidores y clientes Linux/Windows | Red local |
-| NFS (v4) | 192.168.1.10 | 2049 | TCP | Compartición de archivos | Clientes NFS (Linux) | Subred 192.168.1.0/24 |
-| NIS (portmapper) | 192.168.1.10 | 111 | TCP/UDP | Autenticación centralizada | Clientes Linux | Subred 192.168.1.0/24 |
-| NIS (ypserv, puerto fijado) | 192.168.1.10 | 1011 | TCP/UDP | Autenticación centralizada | Clientes Linux | Subred 192.168.1.0/24 |
-| NIS (yppasswdd, puerto fijado) | 192.168.1.10 | 1012 | TCP/UDP | Cambio de contraseña | Clientes Linux | Subred 192.168.1.0/24 |
-| CUPS (IPP) | 192.168.1.10 | 631 | HTTP/HTTPS/TCP | Servidor de impresión | Clientes Linux y Windows | Subred 192.168.1.0/24 |
-| Samba (SMB) | 192.168.1.10 | 445, 139 | TCP | Compartición de archivos | Clientes Windows/Mac | Subred 192.168.1.0/24 |
-| Samba (NetBIOS) | 192.168.1.10 | 137, 138 | UDP | Resolución de nombres NetBIOS | Clientes Windows | Subred 192.168.1.0/24 |
-| SSH administrativo | 192.168.1.10 | 22 | TCP | Administración remota | Administradores TI | Solo IPs de administradores |
+| DNS / dominio | DuckDNS (externo) | 53 (salida) | UDP/TCP | Resolución de nombres | Todos los equipos | Externo |
+| Let's Encrypt (validación DNS-01) | — | 443 (salida de Traefik hacia DuckDNS y Let's Encrypt) | HTTPS/TCP | Emisión de certificados | Traefik | Sin tráfico entrante |
+| NTP | 192.168.1.34 | 123 | UDP | Sincronización horaria | Clientes Linux | Subred 192.168.1.0/24 |
+| NFS (v4) | 192.168.1.34 | 2049 | TCP | Compartición de archivos | Clientes Linux | Subred 192.168.1.0/24 |
+| NIS (portmapper) | 192.168.1.34 | 111 | TCP/UDP | Autenticación centralizada | Clientes Linux | Subred 192.168.1.0/24 |
+| NIS (ypserv, puerto fijado) | 192.168.1.34 | 1011 | TCP/UDP | Autenticación centralizada | Clientes Linux | Subred 192.168.1.0/24 |
+| NIS (yppasswdd, puerto fijado) | 192.168.1.34 | 1012 | TCP/UDP | Cambio de contraseña | Clientes Linux | Subred 192.168.1.0/24 |
+| CUPS (IPP / panel web) | 192.168.1.34 | 631 | HTTP/HTTPS/TCP | Servidor de impresión | Clientes Linux y Windows | Subred 192.168.1.0/24 |
+| Samba (SMB) | 192.168.1.34 | 445 | TCP | Compartición de archivos | Clientes Windows/Mac | Subred 192.168.1.0/24 |
+| SSH administrativo | 192.168.1.34 | 22 | TCP | Administración remota | Administradores TI | Red local |
 
-**Nota:** los puertos 1011 y 1012 se fijan en `/etc/default/nis` (`YPSERVARGS="-p 1011"` y `YPPASSWDDARGS="--port 1012"`) para poder filtrarlos con UFW, ya que por defecto NIS usa puertos dinámicos.
+**Notas:**
+- Los puertos 1011 y 1012 se fijan en `/etc/default/nis` (`YPSERVARGS="-p 1011"` y `YPPASSWDDARGS="--port 1012"`) para poder filtrarlos con el firewall, ya que por defecto NIS usa puertos dinámicos.
+- Samba usa solo el puerto 445 (SMB directo), suficiente para clientes Windows 11 y macOS; no se habilitaron los puertos NetBIOS (137, 138, 139).
+- Los puertos publicados por Docker (80, 443 y 3000) no son filtrados por las reglas de UFW, porque Docker los gestiona directamente con iptables; la restricción del puerto 3000 se complementa con el control de acceso de la propia plataforma.
+
 
 ## **6. Decisiones de diseño**
 
-- Se usará **Ubuntu Server 22.04/24.04 LTS** por ser una distribución estable, ampliamente documentada y compatible con los servicios requeridos.
-- Los servicios web, API y base de datos se desplegarán mediante **Dokploy**, mientras que NTP, NFS, NIS, CUPS y Samba se instalarán directamente en el servidor Linux.
-- Se utilizará **Traefik** como punto único de entrada HTTP/HTTPS; no se instalará otro servidor web en el host para evitar conflictos de puertos.
-- Se aplicará **HTTPS** al sitio institucional y al Panel Admin, que se accederá por subdominio a través de Traefik. El puerto 3000 se cerrará una vez configurado el dominio.
-- La máquina virtual usará red en **modo bridged** con IP fija, de modo que los clientes de la red local puedan acceder a los servicios.
-- Se usará **NFSv4** y se limitará a la subred local (`192.168.1.0/24`) con `root_squash` activo, para reducir el riesgo de acceso no autorizado.
-- **NIS** se restringirá a la subred local mediante `securenets` y UFW, dado que no cifra la información de las cuentas.
-- **Samba** requerirá autenticación de usuarios del grupo `sambausers`; no se habilitará acceso de invitados.
-- **CUPS** permitirá administración desde la red local, con control de usuarios autorizados (`lpadmin`).
-- **PostgreSQL** no se publicará fuera de la red interna de Docker.
-- Se configurará **UFW** para permitir únicamente los puertos de la tabla de requisitos según su origen. El acceso administrativo a Dokploy y SSH estará restringido a los administradores de TI.
+- Se usó **Ubuntu Server 24.04.5 LTS** por ser una distribución estable, ampliamente documentada y compatible con los servicios requeridos.
+- La virtualización se realizó con **Multipass sobre Hyper-V** en un host Windows 11, en lugar de VirtualBox o VMware, por ser el hipervisor disponible en el equipo anfitrión. El servidor cumple los mínimos del proyecto (2 vCPU, 4 GB de RAM, 40 GB de disco).
+- La red usa un **switch virtual externo** (`Nutresa-External`) ligado al adaptador Wi-Fi, de modo que la VM queda en la red local `192.168.1.0/24` (modo *bridged*). La VM tiene dos interfaces: `eth0` (red interna NAT) y `eth1` (red local).
+- La IP de servicio `192.168.1.34` se configuró como **dirección adicional en `eth1`**, manteniendo el DHCP activo, para que los servicios no dejen de responder si el DHCP asigna otra dirección.
+- Los servicios web, API y base de datos se despliegan mediante **Dokploy**, mientras que NTP, NFS, NIS, CUPS y Samba se instalaron directamente en el servidor Linux.
+- Se usó **Traefik** como punto único de entrada HTTP/HTTPS; no se instaló otro servidor web en el host para evitar conflictos de puertos.
+- Se usó **Chrony** en lugar del paquete `ntp`, por ser el servicio mantenido en Ubuntu 24.04 y cumplir la misma función.
+- Como el servidor está en una IP privada, el certificado SSL se obtiene con el **desafío DNS-01** mediante DuckDNS, en lugar de HTTP-01.
+- Se usó **NFSv4** limitado a la subred local (`192.168.1.0/24`) con `root_squash` activo, y permisos por grupo (`nutresa`, GID 2000), para reducir el riesgo de acceso no autorizado.
+- **NIS** se restringió a la subred local mediante `securenets`, dado que no cifra la información de las cuentas.
+- **Samba** requiere autenticación de usuarios del grupo `sambausers`; no se habilitó el acceso de invitados.
+- **CUPS** se publica en la red local y se probó con una impresora virtual (`cups-pdf`) al no haber impresora física.
+- **PostgreSQL** no se publica fuera de la red interna de Docker.
+- El acceso al panel de Dokploy (puerto 3000) se limita a las IPs de los administradores.
 
 ## **7. Beneficios esperados**
 
-- Centralización de servicios en un solo servidor local.
+- Centralización de servicios en un solo servidor local, accesible en `192.168.1.34`.
 - Administración más simple de aplicaciones mediante Dokploy.
 - Acceso seguro al sitio institucional mediante HTTPS.
 - Sincronización horaria confiable en toda la red.
 - Archivos corporativos disponibles para Linux, Windows y macOS.
 - Autenticación centralizada de usuarios Linux mediante NIS.
 - Impresión compartida y controlada mediante CUPS.
-- Base de datos integrada a la aplicación institucional.
-
+- Base de datos PostgreSQL integrada a la plataforma y accesible solo para la API.
 ## **8. Análisis costo-beneficio**
 
 | Componente | Costo de licencia | Observación |
@@ -166,9 +157,10 @@ Servidor: Ubuntu Server, IP fija `192.168.1.10/24` (reserva DHCP o configuració
 | Certificados SSL (Let's Encrypt) | $0 | Renovación automática |
 | Dominio | $0 (DNS dinámico gratuito) | Un dominio propio tendría un costo anual |
 | Hardware | Servidor local existente | Costo de energía y mantenimiento |
+| Multipass y Hyper-V | $0 | Multipass es software libre; Hyper-V viene incluido en el Windows del equipo anfitrión |
 
 **Costos:** al usar solo software libre, el costo se concentra en el tiempo de implementación y administración del personal de TI y en el hardware existente. Un equivalente con licencias (Windows Server, servidor de impresión y servicio de autenticación comerciales) implicaría costos recurrentes por licencia y acceso de clientes.
 
 **Beneficios:** menor costo de licenciamiento, administración centralizada, despliegues reproducibles y una base de infraestructura que puede crecer.
 
-**Riesgos y limitaciones:** un único servidor es un punto de falla (se mitiga con respaldos de configuración y snapshots de la VM), y NIS tiene limitaciones de seguridad (se mitiga restringiéndolo a la red local).
+**Riesgos y limitaciones:** un único servidor es un punto de falla (se mitiga con respaldos de configuración y snapshots de la VM). NIS tiene limitaciones de seguridad (se mitiga restringiéndolo a la red local). El dominio gratuito de DuckDNS depende de un tercero y apunta a una IP privada, por lo que el sitio solo es accesible desde la red local. Por último, la dirección de la VM puede cambiar por DHCP; se mitigó fijando la IP de servicio como dirección adicional.
