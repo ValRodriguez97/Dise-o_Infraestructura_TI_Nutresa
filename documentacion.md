@@ -374,7 +374,6 @@ ping -c 4 192.168.1.34
 | Herramientas instaladas | `dpkg -l chrony ufw openssh-server` | estado `ii` | 02 |
 | Switch externo | `Get-VMSwitch` | `Nutresa-External` tipo `External` | 04 |
 | IP en la red local | `ip -br addr` | `eth1 192.168.1.34/24` | 05, 06 |
-| IP fija en Netplan | `sudo netplan get` | `192.168.1.34/24` en `eth1` (`60-nutresa.yaml`) | pendiente |
 | Cliente → servidor | `ping -c 4 192.168.1.34` | 0 % de pérdida | 08 |
 
 ## 1.8 Solución de problemas de la Sección 1
@@ -1176,4 +1175,4 @@ El navegador mostraba inicialmente el sitio como «no seguro», pero era por la 
 
 ---
 
-*Fin de las secciones 1 a 3 y de la Sección 7. Las secciones 4 a 6 y 8 a 9 son responsabilidad de los Integrantes 2 y 3.*
+*Fin de las secciones 1 a 3. Las secciones 4 a 9 son responsabilidad de los Integrantes 2 y 3.*
