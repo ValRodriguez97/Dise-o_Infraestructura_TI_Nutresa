@@ -243,7 +243,87 @@ sudo cat /etc/netplan/*.yaml
 ip -4 addr show eth1
 ```
 
-Con esto, si el DHCP entrega otra dirección, el servidor sigue respondiendo en `192.168.1.34` y los servicios (NTP, NFS, etc.) no dejan de funcionar.
+Con esto, si el DHCP entrega otra dirección, el servidor sigue respondiendo en `192.168.1.34` y los servicios (NTP, NFS, etc.) no dejan de funcionar. Los pasos detallados de esa configuración son los siguientes.
+
+### Configuración detallada de la IP fija en Netplan
+
+**Paso 1 — Revisar la red actual de la VM.** Se revisan las interfaces y las rutas para identificar cuál es la red local: `eth0` es la red interna de Hyper-V y `eth1` es la red Wi-Fi `192.168.1.x`:
+
+```bash
+ip -br addr
+ip route
+ls -l /etc/netplan/
+sudo cat /etc/netplan/*.yaml
+```
+
+*(Captura pendiente.)*
+
+**Paso 2 — Comprobar que `192.168.1.34` está libre.** Antes de usarla se probó con un `ping` desde Windows:
+
+```powershell
+ping 192.168.1.34
+```
+
+El ping devolvió «Respuesta desde 192.168.1.14: Host de destino inaccesible», es decir, la dirección estaba libre.
+
+*(Captura pendiente.)*
+
+**Paso 3 — Crear la configuración de Netplan.** No se modificó el archivo original (`50-cloud-init.yaml`, generado por cloud-init): se hizo una copia de seguridad y se creó un archivo adicional que solo añade la IP:
+
+```bash
+sudo mkdir -p /root/backup-red
+sudo cp -a /etc/netplan/50-cloud-init.yaml /root/backup-red/50-cloud-init.yaml.bak
+sudo nano /etc/netplan/60-nutresa.yaml
+```
+
+*(Captura pendiente.)*
+
+Contenido de `60-nutresa.yaml`:
+
+```yaml
+network:
+  version: 2
+  ethernets:
+    extra0:
+      addresses:
+        - 192.168.1.34/24
+```
+
+*(Captura pendiente.)*
+
+Se ajustan permisos y se valida la configuración:
+
+```bash
+sudo chown root:root /etc/netplan/60-nutresa.yaml
+sudo chmod 600 /etc/netplan/60-nutresa.yaml
+sudo netplan generate
+sudo netplan get
+```
+
+*(Captura pendiente.)*
+
+**Paso 4 — Aplicar la configuración de forma segura.** `netplan try` aplica el cambio y lo revierte automáticamente a los 120 segundos si no se confirma:
+
+```bash
+sudo netplan try --timeout 120
+```
+
+Se confirma con Enter y luego se verifica dentro de la VM:
+
+```bash
+ip -br addr
+ip route
+sudo docker node ls
+```
+
+Y desde Windows:
+
+```powershell
+ping 192.168.1.34
+arp -a | findstr 192.168.1.34
+```
+
+*(Capturas pendientes: verificación con `netplan try` y con `ping`/`arp -a` desde Windows.)*
 
 ## 1.5 Crear el nodo cliente
 
@@ -294,6 +374,7 @@ ping -c 4 192.168.1.34
 | Herramientas instaladas | `dpkg -l chrony ufw openssh-server` | estado `ii` | 02 |
 | Switch externo | `Get-VMSwitch` | `Nutresa-External` tipo `External` | 04 |
 | IP en la red local | `ip -br addr` | `eth1 192.168.1.34/24` | 05, 06 |
+| IP fija en Netplan | `sudo netplan get` | `192.168.1.34/24` en `eth1` (`60-nutresa.yaml`) | pendiente |
 | Cliente → servidor | `ping -c 4 192.168.1.34` | 0 % de pérdida | 08 |
 
 ## 1.8 Solución de problemas de la Sección 1
@@ -747,4 +828,352 @@ cat /mnt/nutresa/prueba_servidor.txt     # Documento creado desde el servidor Nu
 
 ---
 
-*Fin de las secciones 1 a 3. Las secciones 4 a 9 son responsabilidad de los Integrantes 2 y 3.*
+# Sección 7. Traefik, dominio y SSL/TLS
+
+**Objetivo.** Dejar el servidor `nutresa-server` accesible por un nombre de dominio real (`nutresa-admin.duckdns.org`) y con un certificado HTTPS válido de Let's Encrypt, usando el desafío **DNS-01** de ACME, que no requiere abrir puertos del router (la red es local, detrás del Wi-Fi).
+
+**Resumen de lo realizado**
+
+1. Apuntar el dominio de DuckDNS a la IP de servicio `192.168.1.34`.
+2. Verificar la resolución DNS del dominio desde Windows y desde la VM.
+3. Configurar Traefik con el proveedor `duckdns` y el desafío DNS-01 (primero con el servidor *staging* de Let's Encrypt).
+4. Recrear el contenedor de Traefik con el token de DuckDNS.
+5. Configurar el dominio en Dokploy.
+6. Pasar del certificado de pruebas al certificado real de producción.
+7. Probar el acceso HTTPS desde Windows y desde el navegador.
+
+## 7.1 Dominio DNS con DuckDNS
+
+### Apuntar el dominio a la IP privada
+
+En el panel oficial de [DuckDNS](https://www.duckdns.org) se agrega un nuevo dominio, en este caso `nutresa-admin`, se escribe la IP `192.168.1.34` y se pulsa *update ip*. DuckDNS genera un token que, por razones de seguridad, no se comparte con nadie.
+
+![Panel de DuckDNS](capturas/16a_duckdns_panel.png)
+
+*Captura 16a — `capturas/16a_duckdns_panel.png`: panel de DuckDNS con el dominio `nutresa-admin` y la IP `192.168.1.34`.*
+
+### Probar la resolución del dominio
+
+Se prueba desde la terminal de Windows para confirmar que el dominio responde con la IP correcta:
+
+```powershell
+nslookup nutresa-admin.duckdns.org 8.8.8.8
+nslookup nutresa-admin.duckdns.org
+```
+
+![nslookup con DNS público](capturas/16b_nslookup_dns_8888.png)
+
+*Captura 16b — `capturas/16b_nslookup_dns_8888.png`: `nslookup` contra `8.8.8.8` devolviendo `192.168.1.34`.*
+
+![nslookup con DNS predeterminado](capturas/16c_nslookup_dns_default.png)
+
+*Captura 16c — `capturas/16c_nslookup_dns_default.png`: `nslookup` con el DNS predeterminado del sistema.*
+
+Desde Ubuntu (`nutresa-server`) también se prueba:
+
+```bash
+getent hosts nutresa-admin.duckdns.org
+```
+
+![Resolución desde la VM](capturas/16d_getent_hosts_vm.png)
+
+*Captura 16d — `capturas/16d_getent_hosts_vm.png`: resolución del dominio desde la VM.*
+
+Con esto queda creado el dominio DNS.
+
+## 7.2 Certificado SSL/TLS con Let's Encrypt (DNS-01)
+
+Con el desafío **DNS-01**, Let's Encrypt no se conecta al servidor directamente: solo consulta un registro TXT que Traefik crea en DuckDNS con el token. Así no es necesario abrir puertos ni tocar el router.
+
+### Revisar la configuración actual de Traefik
+
+En el shell de `nutresa-server` se verifica cómo está Traefik y cuáles son los montajes del contenedor:
+
+```bash
+sudo docker exec dokploy-traefik traefik version
+sudo docker inspect dokploy-traefik --format '{{json .Mounts}}'
+sudo cat /etc/dokploy/traefik/traefik.yml
+sudo ls -l /etc/dokploy/traefik/dynamic/
+```
+
+*(Captura pendiente.)*
+
+Hallazgos: el resolver `letsencrypt` usaba el desafío **HTTP-01**, que necesita el puerto 80 abierto a internet y no funciona en una red local; además, el archivo `acme.json` tenía 0 bytes, es decir, nunca se había emitido un certificado.
+
+### Copia de seguridad
+
+Antes de proceder se guarda una copia de seguridad de la configuración por si algo falla:
+
+```bash
+sudo mkdir -p /root/backup-red
+sudo cp -a /etc/dokploy/traefik/traefik.yml /root/backup-red/traefik.yml.bak
+sudo ls -l /root/backup-red
+```
+
+![Copia de seguridad](capturas/17a_traefik_backup.png)
+
+*Captura 17a — `capturas/17a_traefik_backup.png`: copia de seguridad de `traefik.yml` creada en `/root/backup-red`.*
+
+### Guardar el token de forma segura
+
+El token se guarda en un archivo que solo puede leer root, fuera del repositorio:
+
+```bash
+read -rsp "DUCKDNS_TOKEN: " T; echo
+printf 'DUCKDNS_TOKEN=%s\n' "$T" | sudo tee /root/duckdns.env >/dev/null
+sudo chmod 600 /root/duckdns.env
+```
+
+![Token guardado](capturas/17b_token_duckdns_env.png)
+
+*Captura 17b — `capturas/17b_token_duckdns_env.png`: guardado del token de DuckDNS en `/root/duckdns.env`.*
+
+El token no se guardó correctamente en el primer intento (el archivo quedó vacío); se resolvió escribiéndolo con `nano` (ver Problema 7.B):
+
+```bash
+sudo nano /root/duckdns.env
+sudo chmod 600 /root/duckdns.env
+sudo awk -F= '/^DUCKDNS_TOKEN=/{print "longitud en archivo:", length($2)}' /root/duckdns.env
+```
+
+![Token corregido](capturas/17c_token_correccion_nano.png)
+
+*Captura 17c — `capturas/17c_token_correccion_nano.png`: corrección del token con `nano` y verificación de su longitud.*
+
+### Editar `traefik.yml` (primero con staging)
+
+Se cambia `httpChallenge` por `dnsChallenge` con el proveedor `duckdns`, se pone un correo real y, para probar sin gastar los límites de Let's Encrypt, se usa el servidor de pruebas (*staging*):
+
+```bash
+sudo nano /etc/dokploy/traefik/traefik.yml
+```
+
+El contenido queda así:
+
+```yaml
+global:
+  sendAnonymousUsage: false
+providers:
+  swarm:
+    exposedByDefault: false
+    watch: true
+  docker:
+    exposedByDefault: false
+    watch: true
+    network: dokploy-network
+  file:
+    directory: /etc/dokploy/traefik/dynamic
+    watch: true
+entryPoints:
+  web:
+    address: :80
+  websecure:
+    address: :443
+    http3:
+      advertisedPort: 443
+    http:
+      tls:
+        certResolver: letsencrypt
+api:
+  insecure: true
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: <correo-del-equipo>
+      storage: /etc/dokploy/traefik/dynamic/acme.json
+      caServer: https://acme-staging-v02.api.letsencrypt.org/directory
+      dnsChallenge:
+        provider: duckdns
+        resolvers:
+          - "1.1.1.1:53"
+          - "8.8.8.8:53"
+```
+
+![Edición de traefik.yml](capturas/17d_traefik_yml_dnschallenge.png)
+
+*Captura 17d — `capturas/17d_traefik_yml_dnschallenge.png`: edición de `traefik.yml` con `dnsChallenge` y servidor *staging*.*
+
+Se valida el archivo:
+
+```bash
+sudo python3 -c 'import yaml; yaml.safe_load(open("/etc/dokploy/traefik/traefik.yml")); print("YAML OK")'
+```
+
+![Validación YAML](capturas/17e_traefik_yml_yaml_ok.png)
+
+*Captura 17e — `capturas/17e_traefik_yml_yaml_ok.png`: validación del YAML modificado.*
+
+Traefik se reiniciaba en bucle y los sitios quedaban sin servicio por dos errores de escritura en el YAML; se corrigieron y el servicio volvió a la normalidad (ver Problemas 7.C y 7.D):
+
+```bash
+sudo sed -i 's/insercure/insecure/' /etc/dokploy/traefik/traefik.yml
+sudo grep -n -B1 -A1 'insecure' /etc/dokploy/traefik/traefik.yml
+sudo python3 -c 'import yaml; yaml.safe_load(open("/etc/dokploy/traefik/traefik.yml")); print("YAML OK")'
+sudo docker restart dokploy-traefik
+sleep 5
+```
+
+![Corrección del primer error](capturas/17f_traefik_fix_insecure.png)
+
+*Captura 17f — `capturas/17f_traefik_fix_insecure.png`: corrección del primer error de escritura (`insercure` → `insecure`).*
+
+```bash
+sudo sed -i 's/exposeByDefault/exposedByDefault/' /etc/dokploy/traefik/traefik.yml
+sudo grep -n 'exposedByDefault' /etc/dokploy/traefik/traefik.yml
+sudo python3 -c 'import yaml; yaml.safe_load(open("/etc/dokploy/traefik/traefik.yml")); print("YAML OK")'
+sudo docker restart dokploy-traefik
+sudo docker logs --since 1m dokploy-traefik
+sudo docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' | grep traefik
+```
+
+![Corrección del segundo error](capturas/17g_traefik_fix_exposedbydefault.png)
+
+*Captura 17g — `capturas/17g_traefik_fix_exposedbydefault.png`: corrección del segundo error de escritura (`exposeByDefault` → `exposedByDefault`).*
+
+### Recrear Traefik con el token
+
+La variable `DUCKDNS_TOKEN` debe existir dentro del contenedor, y un `docker restart` no añade variables de entorno. Por eso se recreó el contenedor con las mismas opciones que tenía, más `--env-file`. Solo se elimina el contenedor: los datos persisten en carpetas del servidor.
+
+```bash
+sudo docker rm -f dokploy-traefik
+sudo docker run -d \
+  --name dokploy-traefik \
+  --restart always \
+  --network dokploy-network \
+  --env-file /root/duckdns.env \
+  -v /etc/dokploy/traefik/traefik.yml:/etc/traefik/traefik.yml \
+  -v /etc/dokploy/traefik/dynamic:/etc/dokploy/traefik/dynamic \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  -p 80:80/tcp -p 443:443/tcp -p 443:443/udp \
+  traefik:v3.6.25
+```
+
+![Contenedor recreado](capturas/17h_traefik_contenedor_recreado.png)
+
+*Captura 17h — `capturas/17h_traefik_contenedor_recreado.png`: recreación del contenedor de Traefik con `--env-file`.*
+
+Se comprueba que el token llegó al contenedor y se revisan los logs:
+
+```bash
+sudo docker exec dokploy-traefik printenv DUCKDNS_TOKEN | wc -c
+sudo docker logs -f --since 1m dokploy-traefik 2>&1 | grep -iE 'acme|duckdns|certificate|error|unable'
+```
+
+![Token en el contenedor](capturas/17i_traefik_token_en_contenedor.png)
+
+*Captura 17i — `capturas/17i_traefik_token_en_contenedor.png`: contenedor `dokploy-traefik` en ejecución con el token disponible.*
+
+En los logs aparecía que no se podía obtener el certificado de ACME y que el certificado servido era `TRAEFIK DEFAULT CERT` (el de respaldo): Traefik reconocía el proveedor `duckdns`, pero por el token vacío no lo estaba leyendo bien (ver Problema 7.D).
+
+![Logs de error del certificado](capturas/17j_traefik_logs_error_acme.png)
+
+*Captura 17j — `capturas/17j_traefik_logs_error_acme.png`: logs de error del certificado antes de corregir el token.*
+
+### Configurar el dominio en Dokploy
+
+En el panel de Dokploy: proyecto → aplicación web `nutresa` → pestaña **Domains**, con estos valores:
+
+| Campo | Valor |
+|---|---|
+| Host | `nutresa-admin.duckdns.org` |
+| Path | `/` |
+| Container Port | `80` |
+| HTTPS | Activado |
+| Certificate | Let's Encrypt |
+
+![Dominio en Dokploy](capturas/17k_dokploy_dominio_https.png)
+
+*Captura 17k — `capturas/17k_dokploy_dominio_https.png`: dominio configurado en Dokploy con HTTPS y certificado Let's Encrypt.*
+
+Dokploy genera la ruta de Traefik en `/etc/dokploy/traefik/dynamic/my-first-project-nutresa-qmjfti.yml`, con un router `web` que redirige a HTTPS y un router `websecure` que usa `certResolver: letsencrypt`:
+
+```bash
+sudo cat /etc/dokploy/traefik/dynamic/my-first-project-nutresa-qmjfti.yml
+```
+
+*(Captura pendiente.)*
+
+### Verificar el resultado de la prueba (staging)
+
+```bash
+sudo docker logs --since 2m dokploy-traefik 2>&1 | grep -iE 'acme|duckdns|certificate|error|unable'
+echo | openssl s_client -connect 192.168.1.34:443 -servername nutresa-admin.duckdns.org 2>/dev/null | openssl x509 -noout -issuer -subject -dates
+```
+
+![Certificado de staging](capturas/17l_certificado_staging.png)
+
+*Captura 17l — `capturas/17l_certificado_staging.png`: certificado de staging, issuer = (STAGING) Dastardly Durum YR1. La prueba DNS-01 funcionó correctamente.*
+
+### Pasar al certificado real en producción
+
+Se eliminó el `caServer` de `traefik.yml` y se vació `acme.json`, que solo contenía certificados de prueba. Traefik se detuvo solo unos segundos; `docker start` conserva la variable del token.
+
+```bash
+sudo nano /etc/dokploy/traefik/traefik.yml
+sudo python3 -c 'import yaml; yaml.safe_load(open("/etc/dokploy/traefik/traefik.yml")); print("YAML OK")'
+sudo docker stop dokploy-traefik
+sudo truncate -s 0 /etc/dokploy/traefik/dynamic/acme.json
+sudo chmod 600 /etc/dokploy/traefik/dynamic/acme.json
+sudo docker start dokploy-traefik
+sleep 60
+echo | openssl s_client -connect 192.168.1.34:443 -servername nutresa-admin.duckdns.org 2>/dev/null | openssl x509 -noout -issuer -subject -dates
+```
+
+![Certificado de producción](capturas/17m_certificado_produccion.png)
+
+*Captura 17m — `capturas/17m_certificado_produccion.png`: certificado de producción, issuer = Let's Encrypt, CN = YR2.*
+
+Con esto se genera el certificado real de Let's Encrypt para `nutresa-admin.duckdns.org`, válido del 12 de noviembre de 2026 al 10 de febrero de 2027. Traefik lo renueva automáticamente unos 30 días antes de vencer.
+
+### Probar el acceso desde Windows
+
+Para comprobar que el certificado funciona se prueba el acceso a la página desde la terminal de Windows:
+
+```powershell
+Test-NetConnection nutresa-admin.duckdns.org -Port 443
+curl.exe -I https://nutresa-admin.duckdns.org
+curl.exe -I http://nutresa-admin.duckdns.org
+```
+
+![Prueba HTTPS desde Windows](capturas/17n_windows_prueba_https.png)
+
+*Captura 17n — `capturas/17n_windows_prueba_https.png`: verificación de conexión con `200 OK` por HTTPS y `308` (redirección) por HTTP.*
+
+Luego, en el navegador, se accede a la página:
+
+![Acceso desde el navegador](capturas/17o_navegador_https.png)
+
+*Captura 17o — `capturas/17o_navegador_https.png`: acceso desde el navegador para verificar el HTTPS.*
+
+El navegador mostraba inicialmente el sitio como «no seguro», pero era por la caché del navegador (ver Problema 7.E): al abrirlo en una ventana de incógnito se confirmó que el certificado servía.
+
+![Sitio seguro verificado](capturas/17p_navegador_sitio_seguro.png)
+
+*Captura 17p — `capturas/17p_navegador_sitio_seguro.png`: verificación de sitio seguro en el navegador.*
+
+## 7.3 Lista de verificación de la Sección 7
+
+| Verificación | Comando | Resultado esperado | Captura |
+|---|---|---|---|
+| Dominio apunta a la IP de servicio | `nslookup nutresa-admin.duckdns.org` | `192.168.1.34` | 16 |
+| Resolución desde la VM | `getent hosts nutresa-admin.duckdns.org` | `192.168.1.34` | 16 |
+| Copia de seguridad de Traefik | `sudo ls -l /root/backup-red` | `traefik.yml.bak` presente | 17 |
+| Token protegido | `sudo ls -l /root/duckdns.env` | permisos `-rw------- (600)` | 17 |
+| YAML válido | `python3 -c 'yaml.safe_load(...)'` | `YAML OK` | 17 |
+| Token dentro del contenedor | `docker exec dokploy-traefik printenv DUCKDNS_TOKEN` | imprime el token | 17 |
+| Certificado de producción | `openssl s_client ... \| openssl x509 -noout -issuer` | issuer = Let's Encrypt (producción) | 17 |
+| HTTPS desde Windows | `curl.exe -I https://nutresa-admin.duckdns.org` | `HTTP/... 200 OK` | 17 |
+
+## 7.4 Solución de problemas de la Sección 7
+
+| # | Problema | Causa | Solución |
+|---|---|---|---|
+| 7.A | El resolver `letsencrypt` no podía emitir certificados: usaba el desafío HTTP-01. | HTTP-01 necesita el puerto 80 abierto a internet y no funciona en una red local. | Cambiar a `dnsChallenge` con el proveedor `duckdns` en `traefik.yml` (Sección 7.2). |
+| 7.B | El token de DuckDNS no se guardó: `/root/duckdns.env` quedó vacío. | El guardado interactivo con `read`/`printf` falló. | Escribir el token con `sudo nano /root/duckdns.env`, `chmod 600` y verificar la longitud con `awk` (Captura 17c). |
+| 7.C | Traefik se reiniciaba en bucle y los sitios quedaban sin servicio. | Dos errores de escritura en `traefik.yml`: `insercure` en lugar de `insecure` y `exposeByDefault` en lugar de `exposedByDefault`. | Corregir ambos con `sed`, validar el YAML y reiniciar el contenedor (Capturas 17f y 17g). |
+| 7.D | Los logs mostraban fallo de ACME y el certificado servido era `TRAEFIK DEFAULT CERT` (el de respaldo). | Traefik reconocía el proveedor `duckdns`, pero leía el token vacío del Problema 7.B. | Corregir el token (7.B) y recrear el contenedor con `--env-file` (Captura 17j). |
+| 7.E | El navegador mostraba el sitio como «no seguro» con el certificado real ya emitido. | Caché del navegador con el certificado anterior. | Verificar en una ventana de incógnito; el candado apareció correctamente (Captura 17p). |
+
+---
+
+*Fin de las secciones 1 a 3 y de la Sección 7. Las secciones 4 a 6 y 8 a 9 son responsabilidad de los Integrantes 2 y 3.*
