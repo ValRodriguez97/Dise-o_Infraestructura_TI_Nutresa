@@ -844,7 +844,9 @@ ip -br addr
 getent group nutresa
 ```
 
-*Captura 18a (PDF de capturas, NIS): nombre `nutresa-server`, IP `192.168.1.34` en `eth1` y grupo `nutresa:x:2000:ubuntu`.*
+![Preparación del servidor](capturas/18a_nis_preparacion_servidor.png)
+
+*Captura 18a — `capturas/18a_nis_preparacion_servidor.png`: nombre `nutresa-server`, IP `192.168.1.34` en `eth1` y grupo `nutresa:x:2000:ubuntu`.*
 
 Se instalan los paquetes y se comprueba que quedaron con estado `ii` (instalado):
 
@@ -858,9 +860,13 @@ command -v ypserv
 
 `ypinit` no está en el `PATH`: se invoca con la ruta completa `/usr/lib/yp/ypinit` (Problema 4.A).
 
-*Captura 18b (PDF de capturas, NIS): `nis` 4.5, `rpcbind` y `ypserv` instalados; `command -v ypinit` no devuelve nada.*
+![Paquetes NIS](capturas/18b_nis_paquetes_instalados.png)
 
-*Captura 18c (PDF de capturas, NIS): instalación explícita de `ypserv` y `rpcbind`; `yp-tools` y `ypserv` con estado `ii`.*
+*Captura 18b — `capturas/18b_nis_paquetes_instalados.png`: `nis` 4.5, `rpcbind` y `ypserv` instalados; `command -v ypinit` no devuelve nada.*
+
+![ypserv y rpcbind](capturas/18c_nis_ypserv_rpcbind.png)
+
+*Captura 18c — `capturas/18c_nis_ypserv_rpcbind.png`: instalación explícita de `ypserv` y `rpcbind`; `yp-tools` y `ypserv` con estado `ii`.*
 
 ## 4.2 Servidor: dominio NIS y nombre del equipo
 
@@ -870,7 +876,9 @@ sudo domainname nutresa.local
 domainname
 ```
 
-*Captura 18d (PDF de capturas, NIS): dominio NIS `nutresa.local` guardado en `/etc/defaultdomain` y activo (`domainname`).*
+![Dominio NIS](capturas/18d_nis_dominio_nutresa_local.png)
+
+*Captura 18d — `capturas/18d_nis_dominio_nutresa_local.png`: dominio NIS `nutresa.local` guardado en `/etc/defaultdomain` y activo (`domainname`).*
 
 Además, `ypinit` necesita que el nombre del servidor resuelva a su IP de red. En `/etc/hosts` solo existía `127.0.1.1 nutresa-server`, así que se agregó la IP de servicio (también en `/etc/cloud/templates/hosts.debian.tmpl`, porque cloud-init regenera `/etc/hosts` en cada arranque):
 
@@ -905,9 +913,13 @@ sudo ss -lntup | grep -E '1011|1012'
 
 **Verificación.** `rpcinfo` muestra `ypserv` en `1011` y `yppasswdd` en `1012`, por TCP y UDP; `ss` confirma ambos puertos en escucha.
 
-*Captura 18e (PDF de capturas, NIS): `/etc/default/nis` con `NISSERVER=master`, `NISCLIENT=false` y `YPSERVARGS="-p 1011"`.*
+![/etc/default/nis](capturas/18e_nis_default_nis_puertos.png)
 
-*Captura 18f (PDF de capturas, NIS): `ypserv` en el puerto `1011` y `yppasswdd` en el `1012` (`rpcinfo -p` y `ss -lntup`).*
+*Captura 18e — `capturas/18e_nis_default_nis_puertos.png`: `/etc/default/nis` con `NISSERVER=master`, `NISCLIENT=false` y `YPSERVARGS="-p 1011"`.*
+
+![Puertos 1011 y 1012](capturas/18f_nis_puertos_1011_1012.png)
+
+*Captura 18f — `capturas/18f_nis_puertos_1011_1012.png`: `ypserv` en el puerto `1011` y `yppasswdd` en el `1012` (`rpcinfo -p` y `ss -lntup`).*
 
 ## 4.4 Servidor: restringir el acceso a la red local
 
@@ -922,7 +934,9 @@ Se borran las dos líneas que dan acceso a todo el mundo (`0.0.0.0 0.0.0.0` y `:
 255.255.255.0   192.168.1.0
 ```
 
-*Captura 18g (PDF de capturas, NIS): `/etc/ypserv.securenets` limitado a `localhost` y a la subred `192.168.1.0/24`.*
+![securenets](capturas/18g_nis_securenets.png)
+
+*Captura 18g — `capturas/18g_nis_securenets.png`: `/etc/ypserv.securenets` limitado a `localhost` y a la subred `192.168.1.0/24`.*
 
 ## 4.5 Servidor: usuario de prueba y base de datos NIS
 
@@ -935,7 +949,9 @@ sudo passwd nisprueba
 id nisprueba        # uid=2101(nisprueba) gid=2000(nutresa) groups=2000(nutresa)
 ```
 
-*Captura 18h (PDF de capturas, NIS): creación del usuario `nisprueba` (UID 2101, GID 2000).*
+![Usuario nisprueba](capturas/18h_nis_usuario_nisprueba.png)
+
+*Captura 18h — `capturas/18h_nis_usuario_nisprueba.png`: creación del usuario `nisprueba` (UID 2101, GID 2000).*
 
 Se construyen los mapas NIS (`ypinit -m` pide la lista de servidores; se deja solo `nutresa-server` y se confirma con `Ctrl+D`):
 
@@ -956,9 +972,13 @@ sudo ypmatch nisprueba passwd.byname
 ypcat passwd
 ```
 
-*Captura 18i (PDF de capturas, NIS): el usuario sí está en el mapa (`makedbm -u`), pero `ypbind` falla con `No NIS server and no -broadcast option specified`.*
+![Error de ypbind](capturas/18i_nis_error_ypbind.png)
 
-*Captura 18j (PDF de capturas, NIS): mapas en `/var/yp/nutresa.local/` (incluido `ypservers`) y `ypmatch nisprueba passwd.byname` devolviendo la cuenta.*
+*Captura 18i — `capturas/18i_nis_error_ypbind.png`: el usuario sí está en el mapa (`makedbm -u`), pero `ypbind` falla con `No NIS server and no -broadcast option specified`.*
+
+![Mapas NIS y ypmatch](capturas/18j_nis_mapas_ypmatch.png)
+
+*Captura 18j — `capturas/18j_nis_mapas_ypmatch.png`: mapas en `/var/yp/nutresa.local/` (incluido `ypservers`) y `ypmatch nisprueba passwd.byname` devolviendo la cuenta.*
 
 > **Importante.** Cada vez que se crea o modifica un usuario en el servidor hay que regenerar los mapas con `sudo make -C /var/yp`.
 
@@ -975,7 +995,9 @@ sudo systemctl enable --now yppasswdd
 
 **Verificación.** `ypserv` y `rpcbind` quedan `enabled` y `active (running)`; el proceso es `/usr/sbin/ypserv -p 1011`.
 
-*Captura 18k (PDF de capturas, NIS): `ypserv` (puerto 1011) y `rpcbind` activos y habilitados; `yppasswdd` habilitado.*
+![Servicios NIS activos](capturas/18k_nis_servicios_activos.png)
+
+*Captura 18k — `capturas/18k_nis_servicios_activos.png`: `ypserv` (puerto 1011) y `rpcbind` activos y habilitados; `yppasswdd` habilitado.*
 
 Reglas de firewall para la subred local:
 
@@ -991,7 +1013,9 @@ sudo ufw status
 
 UFW está **inactivo** (`Status: inactive`): las reglas quedan registradas y se aplicarán al activarlo.
 
-*Captura 18l (PDF de capturas, NIS): reglas de UFW para los puertos 111, 1011 y 1012 (TCP/UDP); UFW aún inactivo.*
+![Reglas UFW para NIS](capturas/18l_nis_ufw_puertos.png)
+
+*Captura 18l — `capturas/18l_nis_ufw_puertos.png`: reglas de UFW para los puertos 111, 1011 y 1012 (TCP/UDP); UFW aún inactivo.*
 
 ## 4.7 Cliente: configuración NIS
 
@@ -1007,7 +1031,9 @@ echo "domain nutresa.local server 192.168.1.34" | sudo tee -a /etc/yp.conf
 
 En `/etc/default/nis` del cliente se mantienen los valores por defecto del paquete (`NISSERVER=false`, `NISCLIENT=true`).
 
-*Captura 19a (PDF de capturas, NIS): cliente: instalación de `nis` con sus dependencias (`ypbind-mt`, `yp-tools`, `libnss-nis`).*
+![Cliente: instalación de NIS](capturas/19a_nis_cliente_instalar.png)
+
+*Captura 19a — `capturas/19a_nis_cliente_instalar.png`: cliente: instalación de `nis` con sus dependencias (`ypbind-mt`, `yp-tools`, `libnss-nis`).*
 
 Para que el sistema consulte las cuentas en NIS además de los archivos locales, se edita `/etc/nsswitch.conf` y se agrega `nis` a las bases de usuarios y grupos:
 
@@ -1040,9 +1066,13 @@ getent group nutresa                  # nutresa:x:2000:ubuntu
 
 **Verificación.** El cliente está enlazado al servidor `192.168.1.34` y resuelve el usuario `nisprueba` y el grupo `nutresa`, que **no existen localmente** en el cliente: los obtiene del servidor NIS.
 
-*Captura 19b (PDF de capturas, NIS): cliente: dominio, `/etc/yp.conf`, activación de `ypbind`, `ypwhich` → `192.168.1.34` y `ypcat passwd` con el usuario `nisprueba`.*
+![Cliente: configuración](capturas/19b_nis_cliente_configuracion.png)
 
-*Captura 19c (PDF de capturas, NIS): cliente: `ypwhich`, `getent passwd nisprueba` y `getent group nutresa` resueltos por NIS.*
+*Captura 19b — `capturas/19b_nis_cliente_configuracion.png`: cliente: dominio, `/etc/yp.conf`, activación de `ypbind`, `ypwhich` → `192.168.1.34` y `ypcat passwd` con el usuario `nisprueba`.*
+
+![Cliente: verificación](capturas/19c_nis_cliente_verificacion.png)
+
+*Captura 19c — `capturas/19c_nis_cliente_verificacion.png`: cliente: `ypwhich`, `getent passwd nisprueba` y `getent group nutresa` resueltos por NIS.*
 
 ## 4.9 Lista de verificación de la Sección 4
 
@@ -1098,9 +1128,13 @@ sudo systemctl status smbd
 
 **Verificación.** `smbd --version` muestra `Version 4.19.5-Ubuntu`; el servicio está `enabled` y `active (running)` con el estado `smbd: ready to serve connections...`.
 
-*Captura 20a (PDF de capturas, Samba): instalación de `samba` y `smbclient`.*
+![Instalación de Samba](capturas/20a_samba_instalar.png)
 
-*Captura 20b (PDF de capturas, Samba): versión de Samba y servicio `smbd` activo.*
+*Captura 20a — `capturas/20a_samba_instalar.png`: instalación de `samba` y `smbclient`.*
+
+![Servicio smbd activo](capturas/20b_samba_servicio_activo.png)
+
+*Captura 20b — `capturas/20b_samba_servicio_activo.png`: versión de Samba y servicio `smbd` activo.*
 
 ## 5.2 Crear el grupo y el usuario Samba
 
@@ -1115,7 +1149,9 @@ sudo pdbedit -L                     # sambanutresa:2102:
 
 Samba guarda sus propias contraseñas (`smbpasswd`), independientes de la contraseña Linux.
 
-*Captura 20c (PDF de capturas, Samba): creación del grupo `sambausers`, del usuario `sambanutresa` y alta en la base de Samba (`pdbedit -L`).*
+![Usuario y grupo Samba](capturas/20c_samba_usuario_grupo.png)
+
+*Captura 20c — `capturas/20c_samba_usuario_grupo.png`: creación del grupo `sambausers`, del usuario `sambanutresa` y alta en la base de Samba (`pdbedit -L`).*
 
 ## 5.3 Crear la carpeta corporativa
 
@@ -1127,7 +1163,9 @@ ls -ld /srv/samba/corporativo       # drwxrws--- 2 root sambausers ...
 echo "Documentacion corporativa Grupo Nutresa" | sudo tee /srv/samba/corporativo/README.txt
 ```
 
-*Captura 20d (PDF de capturas, Samba): carpeta `/srv/samba/corporativo` con permisos `2770` y archivo de prueba `README.txt`.*
+![Carpeta corporativa](capturas/20d_samba_carpeta_corporativo.png)
+
+*Captura 20d — `capturas/20d_samba_carpeta_corporativo.png`: carpeta `/srv/samba/corporativo` con permisos `2770` y archivo de prueba `README.txt`.*
 
 ## 5.4 Configurar el recurso compartido
 
@@ -1177,21 +1215,31 @@ smbclient //127.0.0.1/Corporativo -U sambanutresa -c 'ls'
 
 Resultado: lista `README.txt` dentro del recurso.
 
-*Captura 20e (PDF de capturas, Samba): sección `[Corporativo]` al final de `/etc/samba/smb.conf`.*
+![smb.conf](capturas/20e_samba_smb_conf.png)
 
-*Captura 20f (PDF de capturas, Samba): reglas de UFW para SMB (`445/tcp`) y NetBIOS (`137-139`).*
+*Captura 20e — `capturas/20e_samba_smb_conf.png`: sección `[Corporativo]` al final de `/etc/samba/smb.conf`.*
+
+![Reglas UFW para Samba](capturas/20f_samba_ufw_puertos.png)
+
+*Captura 20f — `capturas/20f_samba_ufw_puertos.png`: reglas de UFW para SMB (`445/tcp`) y NetBIOS (`137-139`).*
 
 ## 5.5 Prueba desde Windows
 
 En el Explorador de archivos de Windows se escribe `\\192.168.1.34\Corporativo` en la barra de direcciones y se ingresan las credenciales de `sambanutresa`.
 
-*Captura 21a (PDF de capturas, Samba): Windows pide credenciales de red para `192.168.1.34`; el aviso en rojo confirma que no se permite el acceso de invitados (Problema 5.A).*
+![Credenciales en Windows](capturas/21a_samba_windows_credenciales.png)
 
-*Captura 21b (PDF de capturas, Samba): recurso `Corporativo` abierto desde Windows, con el archivo `README` creado en el servidor.*
+*Captura 21a — `capturas/21a_samba_windows_credenciales.png`: Windows pide credenciales de red para `192.168.1.34`; el aviso en rojo confirma que no se permite el acceso de invitados (Problema 5.A).*
+
+![Carpeta Corporativo en Windows](capturas/21b_samba_windows_carpeta.png)
+
+*Captura 21b — `capturas/21b_samba_windows_carpeta.png`: recurso `Corporativo` abierto desde Windows, con el archivo `README` creado en el servidor.*
 
 Desde Windows se crea un archivo de texto de prueba dentro de la carpeta:
 
-*Captura 21c (PDF de capturas, Samba): archivo `prueba_windows.txt` creado desde Windows con el texto «Prueba de compartición samba desde Windows».*
+![Archivo creado desde Windows](capturas/21c_samba_windows_archivo_prueba.png)
+
+*Captura 21c — `capturas/21c_samba_windows_archivo_prueba.png`: archivo `prueba_windows.txt` creado desde Windows con el texto «Prueba de compartición samba desde Windows».*
 
 Y se verifica desde el servidor:
 
@@ -1206,7 +1254,9 @@ sudo ls -l /srv/samba/corporativo/
 
 El archivo llega con dueño `sambanutresa`, grupo `sambausers` y permisos `0660`, como se definió en `smb.conf`.
 
-*Captura 21d (PDF de capturas, Samba): el archivo creado desde Windows aparece en el servidor con dueño `sambanutresa` y grupo `sambausers`.*
+![Verificación en el servidor](capturas/21d_samba_servidor_verifica_archivo.png)
+
+*Captura 21d — `capturas/21d_samba_servidor_verifica_archivo.png`: el archivo creado desde Windows aparece en el servidor con dueño `sambanutresa` y grupo `sambausers`.*
 
 ## 5.6 Lista de verificación de la Sección 5
 
@@ -1258,9 +1308,13 @@ sudo systemctl status cups
 
 **Verificación.** `cups.service` queda `enabled` y `active (running)` con estado `Scheduler is running...`.
 
-*Captura 22a (PDF de capturas, CUPS): instalación de `cups` y `printer-driver-cups-pdf`.*
+![Instalación de CUPS](capturas/22a_cups_instalar.png)
 
-*Captura 22b (PDF de capturas, CUPS): servicio CUPS habilitado y en ejecución.*
+*Captura 22a — `capturas/22a_cups_instalar.png`: instalación de `cups` y `printer-driver-cups-pdf`.*
+
+![Servicio CUPS activo](capturas/22b_cups_servicio_activo.png)
+
+*Captura 22b — `capturas/22b_cups_servicio_activo.png`: servicio CUPS habilitado y en ejecución.*
 
 ## 6.2 Permitir el acceso desde la red local
 
@@ -1301,9 +1355,13 @@ sudo systemctl restart cups
 
 **Verificación.** `cupsd -t` responde `"/etc/cups/cupsd.conf" is OK.` (el aviso `Printer drivers are deprecated` es informativo y no impide el funcionamiento).
 
-*Captura 22c (PDF de capturas, CUPS): `cupsd.conf` con `Port 631` y acceso permitido a `192.168.1.0/24` en `/` y `/admin`.*
+![cupsd.conf](capturas/22c_cups_cupsd_conf.png)
 
-*Captura 22d (PDF de capturas, CUPS): validación con `cupsd -t` y reinicio del servicio.*
+*Captura 22c — `capturas/22c_cups_cupsd_conf.png`: `cupsd.conf` con `Port 631` y acceso permitido a `192.168.1.0/24` en `/` y `/admin`.*
+
+![Validación de cupsd.conf](capturas/22d_cups_validar_configuracion.png)
+
+*Captura 22d — `capturas/22d_cups_validar_configuracion.png`: validación con `cupsd -t` y reinicio del servicio.*
 
 ## 6.3 Crear la cola de impresión `Nutresa-PDF`
 
@@ -1324,9 +1382,13 @@ sudo ufw allow from 192.168.1.0/24 to any port 631 proto tcp
 
 **Verificación.** `lpstat -p -d` muestra `printer Nutresa-PDF is idle. enabled since ...`. El paquete `cups-pdf` crea además su propia cola `PDF`, que queda como destino por defecto.
 
-*Captura 22e (PDF de capturas, CUPS): dispositivo `cups-pdf:/`, creación de la cola `Nutresa-PDF` y estado con `lpstat -p -d`.*
+![Cola Nutresa-PDF](capturas/22e_cups_impresora_nutresa_pdf.png)
 
-*Captura 22f (PDF de capturas, CUPS): regla de UFW para el puerto `631/tcp` (UFW aún inactivo; la regla queda registrada).*
+*Captura 22e — `capturas/22e_cups_impresora_nutresa_pdf.png`: dispositivo `cups-pdf:/`, creación de la cola `Nutresa-PDF` y estado con `lpstat -p -d`.*
+
+![Regla UFW para CUPS](capturas/22f_cups_ufw_631.png)
+
+*Captura 22f — `capturas/22f_cups_ufw_631.png`: regla de UFW para el puerto `631/tcp` (UFW aún inactivo; la regla queda registrada).*
 
 ## 6.4 Prueba de impresión
 
@@ -1340,13 +1402,17 @@ ls -l ~/PDF/                                   # prueba_impresion.pdf
 
 **Verificación.** El trabajo `Nutresa-PDF-1` aparece como completado y el PDF generado (`prueba_impresion.pdf`, 8474 bytes) está en `~/PDF/`.
 
-*Captura 22g (PDF de capturas, CUPS): envío del trabajo con `lp`, trabajo completado en `lpstat -W completed` y PDF generado en `~/PDF/`.*
+![Prueba de impresión](capturas/22g_cups_prueba_impresion.png)
+
+*Captura 22g — `capturas/22g_cups_prueba_impresion.png`: envío del trabajo con `lp`, trabajo completado en `lpstat -W completed` y PDF generado en `~/PDF/`.*
 
 ## 6.5 Panel web desde Windows
 
 Desde el navegador de Windows se abre `http://192.168.1.34:631/printers/`:
 
-*Captura 22h (PDF de capturas, CUPS): panel de CUPS desde Windows con las colas `Nutresa-PDF` y `PDF`. El estado «Inactiva» equivale a `idle`: la impresora está lista y sin trabajos en cola.*
+![Panel CUPS desde Windows](capturas/22h_cups_panel_windows.png)
+
+*Captura 22h — `capturas/22h_cups_panel_windows.png`: panel de CUPS desde Windows con las colas `Nutresa-PDF` y `PDF`. El estado «Inactiva» equivale a `idle`: la impresora está lista y sin trabajos en cola.*
 
 ## 6.6 Lista de verificación de la Sección 6
 
@@ -1740,9 +1806,13 @@ nproc              # 2
 sudo ss -lntp | grep -E ':80 |:443 |:3000 '     # sin salida: puertos libres
 ```
 
-*Captura 23a (PDF de capturas, Dokploy): la VM cumple los mínimos del proyecto (2 vCPU, ≈4 GB de RAM, ≈40 GB de disco).*
+![Recursos de la VM](capturas/23a_dokploy_recursos_vm.png)
 
-*Captura 23b (PDF de capturas, Dokploy): ningún proceso usa los puertos 80, 443 ni 3000.*
+*Captura 23a — `capturas/23a_dokploy_recursos_vm.png`: la VM cumple los mínimos del proyecto (2 vCPU, ≈4 GB de RAM, ≈40 GB de disco).*
+
+![Puertos libres](capturas/23b_dokploy_puertos_libres.png)
+
+*Captura 23b — `capturas/23b_dokploy_puertos_libres.png`: ningún proceso usa los puertos 80, 443 ni 3000.*
 
 Se instala Dokploy indicando la IP de servicio. `ADVERTISE_ADDR` es necesario porque la VM tiene dos interfaces (`eth0` interna y `eth1` en la red local) y Docker Swarm debe anunciarse en la de la red local:
 
@@ -1752,9 +1822,13 @@ sudo apt install -y curl
 curl -sSL https://dokploy.com/install.sh | sudo ADVERTISE_ADDR=192.168.1.34 sh
 ```
 
-*Captura 23c (PDF de capturas, Dokploy): el instalador detecta la versión `v0.31.0` e instala Docker Engine 28.5.0.*
+![Instalación de Dokploy](capturas/23c_dokploy_instalacion.png)
 
-*Captura 23d (PDF de capturas, Dokploy): mensaje final `Congratulations, Dokploy is installed!` con la dirección `http://192.168.1.34:3000`.*
+*Captura 23c — `capturas/23c_dokploy_instalacion.png`: el instalador detecta la versión `v0.31.0` e instala Docker Engine 28.5.0.*
+
+![Dokploy instalado](capturas/23d_dokploy_instalado.png)
+
+*Captura 23d — `capturas/23d_dokploy_instalado.png`: mensaje final `Congratulations, Dokploy is installed!` con la dirección `http://192.168.1.34:3000`.*
 
 Se comprueba la instalación:
 
@@ -1767,17 +1841,25 @@ curl -I http://localhost:3000          # HTTP/1.1 307 → /register
 sudo docker node ls                    # nutresa-server  Ready  Active  Leader
 ```
 
-*Captura 23e (PDF de capturas, Dokploy): Docker Engine Community 28.5.0 (cliente y servidor).*
+![Versión de Docker](capturas/23e_dokploy_docker_version.png)
 
-*Captura 23f (PDF de capturas, Dokploy): servicio `docker` activo, con `docker-proxy` publicando los puertos 3000, 80 y 443.*
+*Captura 23e — `capturas/23e_dokploy_docker_version.png`: Docker Engine Community 28.5.0 (cliente y servidor).*
 
-*Captura 23g (PDF de capturas, Dokploy): `nutresa-server` como nodo `Leader` del Swarm.*
+![Docker activo](capturas/23f_dokploy_docker_activo.png)
+
+*Captura 23f — `capturas/23f_dokploy_docker_activo.png`: servicio `docker` activo, con `docker-proxy` publicando los puertos 3000, 80 y 443.*
+
+![Nodo Swarm](capturas/23g_dokploy_swarm_node.png)
+
+*Captura 23g — `capturas/23g_dokploy_swarm_node.png`: `nutresa-server` como nodo `Leader` del Swarm.*
 
 ## 8.2 Panel de Dokploy
 
 Desde el navegador de Windows se abre `http://192.168.1.34:3000`, se crea la cuenta de administrador y aparece el asistente inicial:
 
-*Captura 23h (PDF de capturas, Dokploy): panel de Dokploy funcionando en `192.168.1.34:3000`.*
+![Panel de Dokploy](capturas/23h_dokploy_panel.png)
+
+*Captura 23h — `capturas/23h_dokploy_panel.png`: panel de Dokploy funcionando en `192.168.1.34:3000`.*
 
 Se registran las reglas de firewall: el panel solo para las IPs de los administradores (`192.168.1.31` y `192.168.1.15`) y la web para toda la subred:
 
@@ -1788,7 +1870,9 @@ sudo ufw allow from 192.168.1.0/24 to any port 80 proto tcp
 sudo ufw allow from 192.168.1.0/24 to any port 443 proto tcp
 ```
 
-*Captura 23i (PDF de capturas, Dokploy): reglas de UFW para el panel (3000) y la web (80 y 443).*
+![Reglas UFW del panel](capturas/23i_dokploy_ufw_panel.png)
+
+*Captura 23i — `capturas/23i_dokploy_ufw_panel.png`: reglas de UFW para el panel (3000) y la web (80 y 443).*
 
 > **Nota.** Docker publica los puertos `80`, `443` y `3000` directamente en `iptables`, sin pasar por las reglas de UFW (Problema 8.A). Por eso la restricción del panel se complementa con el inicio de sesión de Dokploy.
 
@@ -1807,9 +1891,13 @@ En el panel: **My First Project → production → Create Service → Database �
 
 Luego se pulsa **Deploy**.
 
-*Captura 24a (PDF de capturas, PostgreSQL): logs del despliegue: descarga de `postgres:18` y `Deployment completed successfully!`.*
+![Despliegue de PostgreSQL](capturas/24a_postgres_despliegue.png)
 
-*Captura 24b (PDF de capturas, PostgreSQL): servicio `nutresa-db` en ejecución (indicador verde) en el panel de Dokploy.*
+*Captura 24a — `capturas/24a_postgres_despliegue.png`: logs del despliegue: descarga de `postgres:18` y `Deployment completed successfully!`.*
+
+![Servicio nutresa-db](capturas/24b_postgres_servicio_nutresa_db.png)
+
+*Captura 24b — `capturas/24b_postgres_servicio_nutresa_db.png`: servicio `nutresa-db` en ejecución (indicador verde) en el panel de Dokploy.*
 
 ## 8.4 Comprobar PostgreSQL
 
@@ -1821,7 +1909,9 @@ sudo docker exec -it $(sudo docker ps -q -f name=nutresadb) \
 
 Resultado: `PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu`. La guía sugería la versión 16; se usó la 18, la más reciente disponible.
 
-*Captura 24c (PDF de capturas, PostgreSQL): `SELECT version();` devuelve PostgreSQL 18.6.*
+![Versión de PostgreSQL](capturas/24c_postgres_version.png)
+
+*Captura 24c — `capturas/24c_postgres_version.png`: `SELECT version();` devuelve PostgreSQL 18.6.*
 
 Prueba de escritura y lectura:
 
@@ -1844,7 +1934,9 @@ SELECT * FROM prueba_nutresa;
 (1 row)
 ```
 
-*Captura 24d (PDF de capturas, PostgreSQL): creación de la tabla `prueba_nutresa`, inserción y consulta del registro.*
+![Prueba de tabla](capturas/24d_postgres_prueba_tabla.png)
+
+*Captura 24d — `capturas/24d_postgres_prueba_tabla.png`: creación de la tabla `prueba_nutresa`, inserción y consulta del registro.*
 
 ## 8.5 Lista de verificación de la Sección 8
 
@@ -1888,9 +1980,13 @@ COPY index.html /usr/share/nginx/html/index.html
 EXPOSE 80
 ```
 
-*Captura 25a (PDF de capturas, Web y Backend API): estructura del sitio institucional en `codigo/web/index.html`.*
+![index.html](capturas/25a_web_index_html.png)
 
-*Captura 25b (PDF de capturas, Web y Backend API): Dockerfile de la web basado en `nginx:alpine`.*
+*Captura 25a — `capturas/25a_web_index_html.png`: estructura del sitio institucional en `codigo/web/index.html`.*
+
+![Dockerfile de la web](capturas/25b_web_dockerfile.png)
+
+*Captura 25b — `capturas/25b_web_dockerfile.png`: Dockerfile de la web basado en `nginx:alpine`.*
 
 ## 9.2 Backend API
 
@@ -1917,7 +2013,9 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 Dependencias (`requirements.txt`): `fastapi`, `uvicorn[standard]` y `psycopg[binary]`.
 
-*Captura 25c (PDF de capturas, Web y Backend API): Dockerfile de la API con `uvicorn` en el puerto 8000.*
+![Dockerfile de la API](capturas/25c_api_dockerfile.png)
+
+*Captura 25c — `capturas/25c_api_dockerfile.png`: Dockerfile de la API con `uvicorn` en el puerto 8000.*
 
 ## 9.3 Desplegar la web desde Git
 
@@ -1928,13 +2026,19 @@ En Dokploy: **Create Service → Application** (`nutresa`), y en la pestaña **G
 3. **Build Type:** `Dockerfile`, con el nombre exacto del archivo del repositorio.
 4. **Deploy.**
 
-*Captura 25d (PDF de capturas, Web y Backend API): selección de `Dockerfile` como tipo de construcción.*
+![Build Type en Dokploy](capturas/25d_dokploy_build_type.png)
+
+*Captura 25d — `capturas/25d_dokploy_build_type.png`: selección de `Dockerfile` como tipo de construcción.*
 
 Los primeros despliegues fallaron por el nombre del Dockerfile (Problema 9.A). Una vez corregido, el despliegue terminó correctamente en 12 segundos:
 
-*Captura 25f (PDF de capturas, Web y Backend API): cuatro despliegues con error y el quinto `Done`, todos del commit `78a8c0a` («Implementacion web y backend Nutresa»).*
+![Historial de despliegues](capturas/25f_web_historial_errores.png)
 
-*Captura 25e (PDF de capturas, Web y Backend API): aplicación `nutresa` desplegada (`Done`) en Dokploy.*
+*Captura 25f — `capturas/25f_web_historial_errores.png`: cuatro despliegues con error y el quinto `Done`, todos del commit `78a8c0a` («Implementacion web y backend Nutresa»).*
+
+![Despliegue de la web](capturas/25e_web_despliegue_done.png)
+
+*Captura 25e — `capturas/25e_web_despliegue_done.png`: aplicación `nutresa` desplegada (`Done`) en Dokploy.*
 
 El dominio `nutresa-admin.duckdns.org` con HTTPS se configuró después, en la Sección 7.2 (Captura 17k).
 
@@ -1945,7 +2049,9 @@ Se repiten los pasos de 9.3 con una segunda aplicación (`nutresaAPI`) y **Build
 - **Environment:** se define `DATABASE_URL` con la **cadena de conexión interna** que muestra el servicio `nutresa-db` en Dokploy (pestaña *General → Internal Credentials*). Tiene la forma `postgresql://nutresa-admin:<contraseña>@<host-interno>:5432/nutresa-db`; el host interno es el nombre del servicio, alcanzable solo dentro de la red de Docker.
 - **Domains:** `nutresa-api.192-168-1-34.sslip.io`, puerto `8000`. `sslip.io` es un DNS comodín público que resuelve ese nombre a `192.168.1.34`.
 
-*Captura 25g (PDF de capturas, Web y Backend API): aplicación `nutresaAPI` desplegada (`Done`, 52 segundos).*
+![Despliegue de la API](capturas/25g_api_despliegue_done.png)
+
+*Captura 25g — `capturas/25g_api_despliegue_done.png`: aplicación `nutresaAPI` desplegada (`Done`, 52 segundos).*
 
 Al principio el servicio quedaba en `0/1` y se reiniciaba en bucle (Problema 9.B). Se diagnosticó así:
 
@@ -1960,7 +2066,9 @@ Tras reconstruir con el Dockerfile, la imagen quedó con `CMD=["uvicorn","main:a
 
 Verificación desde el navegador:
 
-*Captura 25h (PDF de capturas, Web y Backend API): `http://nutresa-api.192-168-1-34.sslip.io/health` responde `{"status":"ok"}`.*
+![API /health](capturas/25h_api_health.png)
+
+*Captura 25h — `capturas/25h_api_health.png`: `http://nutresa-api.192-168-1-34.sslip.io/health` responde `{"status":"ok"}`.*
 
 ## 9.5 Lista de verificación de la Sección 9
 
